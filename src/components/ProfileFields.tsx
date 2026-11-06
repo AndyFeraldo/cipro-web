@@ -19,7 +19,6 @@ export default function ProfileFields({ v, set, areas, showArea = true }: { v: P
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2"><label className="label">Nombre completo *</label><input className="input" required {...f('full_name')} /></div>
-      <div><label className="label">Código universitario</label><input className="input" inputMode="numeric" placeholder="20204390" value={v.university_code} onChange={(e) => set({ ...v, university_code: e.target.value.replace(/\D/g, '') })} /></div>
       <CareerField value={v.career} onChange={(career) => set({ ...v, career })} />
       <div>
         <label className="label">¿Cuándo ingresaste a CIPRO?</label>

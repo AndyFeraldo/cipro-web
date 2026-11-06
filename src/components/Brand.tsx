@@ -26,15 +26,19 @@ export function Sparkle({ className = 'h-6 w-6', color = '#FF5117', style }: { c
 }
 
 /** Constelación decorativa (líneas finas con nodos), como en las piezas de marca. */
-export function Constellation({ className = '', color = '#FF5117' }: { className?: string; color?: string }) {
+export function Constellation({ className = '', color = '#FF5117', animated = true }: { className?: string; color?: string; animated?: boolean }) {
   const pts: [number, number][] = [[20, 40], [90, 70], [150, 30], [230, 90], [300, 60], [340, 140], [260, 190], [180, 160], [110, 210], [40, 170]];
   const links = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [1, 7]];
   return (
     <svg viewBox="0 0 360 240" className={className} fill="none" aria-hidden>
-      {links.map(([a, b], i) => <line key={i} x1={pts[a][0]} y1={pts[a][1]} x2={pts[b][0]} y2={pts[b][1]} stroke={color} strokeOpacity=".35" strokeWidth="1" />)}
-      {pts.map(([x, y], i) => i % 3 === 0
-        ? <circle key={i} cx={x} cy={y} r="4.5" stroke={color} strokeWidth="1.5" />
-        : <circle key={i} cx={x} cy={y} r="3.2" fill={color} />)}
+      {links.map(([a, b], i) => <line key={i} x1={pts[a][0]} y1={pts[a][1]} x2={pts[b][0]} y2={pts[b][1]} stroke={color} strokeOpacity=".35" strokeWidth="1"
+        strokeDasharray={animated ? 400 : undefined} className={animated ? 'animate-draw' : ''} style={animated ? { animationDelay: `${i * 0.25}s` } : undefined} />)}
+      {pts.map(([x, y], i) => (
+        <g key={i}>
+          {animated && i % 4 === 1 && <circle cx={x} cy={y} r="4" fill={color} opacity=".5" className="animate-pulsering" style={{ transformOrigin: `${x}px ${y}px`, transformBox: 'view-box', animationDelay: `${i * 0.3}s` }} />}
+          {i % 3 === 0 ? <circle cx={x} cy={y} r="4.5" stroke={color} strokeWidth="1.5" /> : <circle cx={x} cy={y} r="3.2" fill={color} />}
+        </g>
+      ))}
     </svg>
   );
 }

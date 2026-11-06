@@ -2,9 +2,9 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
-/** Las cuentas de ciprianos usan su DNI como usuario (correo interno, nunca se envían correos). */
+/** Las cuentas de ciprianos usan su CÓDIGO ULIMA como usuario (correo interno, nunca se envían correos). */
 export const MEMBER_DOMAIN = 'ciprianos.cipro.invalid';
-export const dniToEmail = (dni: string) => `${dni.replace(/\D/g, '')}@${MEMBER_DOMAIN}`;
+export const codeToEmail = (ucode: string) => `${ucode.replace(/\D/g, '')}@${MEMBER_DOMAIN}`;
 export const isMemberEmail = (email?: string | null) => !!email?.endsWith('@' + MEMBER_DOMAIN);
 
 const Ctx = createContext<{ session: Session | null; ready: boolean }>({ session: null, ready: false });

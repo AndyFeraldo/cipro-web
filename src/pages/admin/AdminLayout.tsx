@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
+import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo';
+import Scrummy from '../../components/Scrummy';
+import { Constellation, Donut, Sparkle } from '../../components/Brand';
 import MembersAdmin from './MembersAdmin';
 import { CrudAdmin } from './CrudAdmin';
 import SettingsAdmin from './SettingsAdmin';
@@ -28,19 +31,14 @@ export default function AdminLayout() {
   }, [session]);
 
   if (!session) return <AdminLogin />;
-  if (isAdmin === null) return <div className="p-10">Verificando permisos…</div>;
-  if (!isAdmin) return (
-    <div className="container-x py-20 text-center">
-      <p>Esta cuenta ({userCode(session.user.email)}) no tiene permisos de administrador.</p>
-      <button className="btn-ghost mt-4" onClick={() => supabase.auth.signOut()}>Cerrar sesión</button>
-    </div>
-  );
+  if (isAdmin === null) return <div className="grid min-h-screen place-items-center bg-cream-gradient"><Donut className="h-16 w-16 animate-spin" /></div>;
+  if (!isAdmin) return <AdminLogin notice={`Estás conectado como ${userCode(session.user.email)}, que no es una cuenta de administrador. Ingresa con la cuenta de la directiva.`} />;
 
   return (
     <div className="min-h-screen bg-brand-50/40">
       <header className="sticky top-0 z-30 border-b border-ink/10 bg-white">
         <div className="container-x flex h-14 items-center justify-between">
-          <div className="flex items-center gap-3"><Logo className="h-8" /><span className="rounded-full bg-ink px-2 py-0.5 text-xs font-bold text-white">ADMIN</span></div>
+          <div className="flex items-center gap-3"><Link to="/" title="Ir a la web"><Logo className="h-7" /></Link><span className="rounded-full bg-ink px-2 py-0.5 text-xs font-bold text-white">ADMIN</span><Link to="/" className="ml-2 hidden rounded-full px-3 py-1.5 text-sm font-semibold text-ink/60 hover:bg-brand-50 hover:text-brand sm:inline-flex">← Ver la web</Link></div>
           <div className="flex items-center gap-3 text-sm"><span className="hidden text-ink/60 sm:inline">Código {userCode(session.user.email)}</span><button onClick={() => setShowPw(true)} title="Cambiar contraseña" aria-label="Cambiar contraseña" className="grid h-9 w-9 place-items-center rounded-full bg-brand-50 text-brand-700 hover:bg-brand hover:text-white"><KeyIcon /></button><button className="btn-ghost py-1.5" onClick={() => supabase.auth.signOut()}>Salir</button></div>
         </div>
         <nav className="container-x flex gap-1 overflow-x-auto pb-2">
@@ -55,7 +53,8 @@ export default function AdminLayout() {
           { key: 'name', label: 'Nombre', required: true }, { key: 'slug', label: 'Identificador (sin espacios)', required: true },
           { key: 'short_name', label: 'Sigla' }, { key: 'description', label: 'Descripción', type: 'textarea' },
           { key: 'icon', label: 'Ícono', type: 'select', options: ['crown', 'compass', 'kanban', 'users', 'megaphone', 'sparkles', 'star'] },
-          { key: 'sort_order', label: 'Orden', type: 'number' }, { key: 'is_active', label: 'Activa', type: 'bool', default: true }]} display={(r) => r.name} />}
+          { key: 'sort_order', label: 'Orden', type: 'number' }, { key: 'is_active', label: 'Activa', type: 'bool', default: true },
+          { key: 'is_historical', label: 'Área histórica (ya no existe; solo registro)', type: 'bool' }]} display={(r) => `${r.name}${r.is_historical ? ' · histórica' : ''}`} />}
         {tab === 'Noticias' && <CrudAdmin table="news" title="Noticias" order="published_at" desc fields={[
           { key: 'title', label: 'Título', required: true }, { key: 'slug', label: 'URL (ej. ciprothon-2026)', required: true },
           { key: 'category', label: 'Categoría', type: 'select', options: ['noticia', 'evento', 'concurso', 'alianza', 'logro'] },
@@ -132,28 +131,55 @@ function KeyIcon({ className = 'h-5 w-5' }: { className?: string }) {
   return <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="7.5" cy="15.5" r="4.5" /><path d="M10.7 12.3 21 2M16 7l3 3M18.5 4.5l2 2" /></svg>;
 }
 
-function AdminLogin() {
+function AdminLogin({ notice }: { notice?: string }) {
   const [codigo, setCodigo] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   return (
-    <div className="grid min-h-screen place-items-center bg-ink p-4">
-      <form className="w-full max-w-sm rounded-3xl bg-white p-8" onSubmit={async (e) => {
-        e.preventDefault(); setErr(''); setBusy(true);
-        const { error } = await supabase.auth.signInWithPassword({ email: codeToEmail(codigo), password });
-        setBusy(false);
-        if (error) setErr('Código o contraseña incorrectos.');
-      }}>
-        <Logo />
-        <h1 className="mt-6 text-xl font-extrabold">Panel de administración</h1>
-        <label className="label mt-6">Código universitario</label>
-        <input className="input" required autoComplete="username" placeholder="20204390" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
-        <label className="label mt-4">Contraseña</label>
-        <input className="input" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        {err && <p className="mt-3 text-sm text-red-600">{err}</p>}
-        <button className="btn-primary mt-6 w-full" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar'}</button>
-      </form>
+    <div className="relative grid min-h-screen overflow-hidden bg-cream-gradient lg:grid-cols-2">
+      <div className="dot-grid absolute inset-0 opacity-50" />
+      <div className="aurora pointer-events-none absolute inset-0" />
+      {/* Lado de marca */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 text-white lg:flex">
+        <div className="dot-grid-light absolute inset-0 opacity-30" />
+        <div className="absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-brand/60 blur-3xl animate-blob" />
+        <Constellation className="absolute right-0 top-16 w-[28rem] opacity-70" />
+        <Link to="/" className="relative"><Logo dark className="h-9" /></Link>
+        <div className="relative">
+          <p className="text-xs font-bold uppercase tracking-[.25em] text-brand-300">Panel de administración</p>
+          <h1 className="mt-3 font-display text-5xl font-black leading-tight">Gestiona la<br />comunidad <span className="text-brand">CIPRO</span></h1>
+          <p className="mt-4 max-w-sm text-white/60">Integrantes por ciclo, solicitudes, noticias, proyectos, alianzas, galería y marca: todo en un solo lugar.</p>
+        </div>
+        <Scrummy pose="frente" className="absolute bottom-0 right-16 h-80" />
+        <p className="relative text-xs text-white/40">Imagina y hazlo realidad.</p>
+      </div>
+      {/* Formulario */}
+      <div className="relative flex flex-col p-6 sm:p-10">
+        <Link to="/" className="inline-flex items-center gap-2 self-start rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-ink/5 transition hover:text-brand">← Volver a la web</Link>
+        <div className="m-auto w-full max-w-sm py-10">
+          <div className="mb-8 lg:hidden"><Logo className="h-9" /></div>
+          <span className="eyebrow bg-white"><Sparkle className="h-3.5 w-3.5" /> Solo directiva</span>
+          <h2 className="mt-4 text-3xl font-black">Ingresa al panel</h2>
+          <p className="mt-1 text-sm text-ink/60">Con tu código universitario y tu contraseña de administrador.</p>
+          {notice && <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 ring-1 ring-amber-200">{notice}</p>}
+          <form className="mt-6 rounded-3xl bg-white p-6 shadow-xl shadow-brand/10 ring-1 ring-ink/5" onSubmit={async (e) => {
+            e.preventDefault(); setErr(''); setBusy(true);
+            await supabase.auth.signOut();
+            const { error } = await supabase.auth.signInWithPassword({ email: codeToEmail(codigo), password });
+            setBusy(false);
+            if (error) setErr('Código o contraseña incorrectos.');
+          }}>
+            <label className="label">Código universitario</label>
+            <input className="input font-semibold tracking-wider" required autoComplete="username" inputMode="numeric" placeholder="20204390" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+            <label className="label mt-4">Contraseña</label>
+            <input className="input" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            {err && <p className="mt-3 rounded-lg bg-red-50 p-2 text-sm text-red-700">{err}</p>}
+            <button className="btn-primary mt-6 w-full py-3" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar al panel'}</button>
+          </form>
+          <p className="mt-6 text-center text-sm text-ink/50">¿Eres cipriano? <Link to="/acceso" className="font-semibold text-brand">Entra a tu perfil aquí</Link></p>
+        </div>
+      </div>
     </div>
   );
 }

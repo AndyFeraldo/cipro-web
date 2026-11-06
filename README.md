@@ -18,9 +18,10 @@ Web del Círculo de Gestión de Proyectos (CIPRO). Está hecha con React, Vite, 
 - `member_private`: **DNI**, correo y hash del código de acceso. Solo el admin puede leer esta tabla; nunca se muestra en la web.
 - `news`, `projects`, `alliances`, `gallery`, `site_settings` (logo, Scrummy, textos)
 - Bucket público `media` para las imágenes. Solo el admin puede subir archivos.
-- Edge Function `member-account` (`supabase/functions/member-account`): auto-registro de ciprianos y asignación de contraseñas por el admin. Las cuentas de ciprianos usan `DNI@ciprianos.cipro.invalid` como usuario interno (no se envían correos).
+- Edge Function `member-account` (`supabase/functions/member-account`): auto-registro de ciprianos y asignación de contraseñas por el admin. Las cuentas de ciprianos usan el **código Ulima** (`CODIGO@ciprianos.cipro.invalid`) como usuario interno (no se envían correos); el DNI es solo un dato privado.
 - Los auto-registros quedan con `status = 'pendiente'` hasta que el admin los apruebe (pestaña Integrantes → ⏳ Solicitudes). Un cipriano no puede cambiar su propio estado ni su DNI (triggers `members_guard` y `member_private_guard`).
-- **Integrantes ya cargados por la directiva**: el admin genera un *código de activación* de 6 caracteres (RPC `admin_create_invite`, se guarda solo su hash, vence en 30 días). El cipriano lo usa en `/acceso#activar` con su DNI para crear su contraseña (`member-account` → `activate`, máx. 10 intentos fallidos por IP/hora).
+- **Código CIPRO**: cada integrante tiene un código único y permanente (tabla `member_codes`, se crea solo al insertar un integrante). El admin lo ve, copia, edita o regenera. Los integrantes que ya estaban en la web lo usan una vez en `/acceso#activar` para crear su cuenta (máx. 10 intentos fallidos por IP/hora).
+- Cargos: Presidencia, Vicepresidencia, Past President, Gerente, Subgerente, Coordinación, Project Leader, Mentor, Cipriano Activo, Entry Member, Alumni. Áreas históricas (`is_historical`): Finanzas, Logística y Comunicaciones (2025).
 - Ciclos desde 2021-1; el admin crea el siguiente con un clic (pestaña Ciclos) o desde la ficha del integrante.
 - Los admins se definen en la tabla `admin_emails` (el login del admin usa el código universitario → `código@aloe.ulima.edu.pe`).
 

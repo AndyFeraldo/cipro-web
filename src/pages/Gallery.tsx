@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAsync } from '../lib/useQuery';
 import type { GalleryItem } from '../lib/types';
 import { Constellation, Sparkle } from '../components/Brand';
+import { Blobs } from '../components/Motion';
 
 export default function Gallery() {
   const g = useAsync<GalleryItem[]>(() => supabase.from('gallery').select('*, periods(code)').order('sort_order'));
@@ -15,6 +16,7 @@ export default function Gallery() {
   return (
     <div className="pb-20">
       <section className="relative overflow-hidden bg-cream-gradient py-14">
+        <Blobs />
         <Constellation className="pointer-events-none absolute right-0 top-0 w-96 opacity-60" />
         <div className="container-x relative">
           <span className="eyebrow bg-white"><Sparkle className="h-3.5 w-3.5" /> Galería</span>

@@ -8,6 +8,7 @@ import Scrummy from '../components/Scrummy';
 import Icon from '../components/Icon';
 import MemberCard from '../components/MemberCard';
 import { Constellation, Donut, Marquee, Sparkle } from '../components/Brand';
+import { Blobs, CountUp, Reveal, Starfield, Tilt, useParallax } from '../components/Motion';
 
 const PILARES = [
   ['Formar', 'Competencias técnicas, power skills, liderazgo y criterio profesional.'],
@@ -24,7 +25,8 @@ const SOCIAL = ['taller-linkedin', 'invitado-especial', 'feed-1', 'feed-2', 'fee
 export default function Home() {
   const { settings } = useSettings();
   const [pillar, setPillar] = useState<number | null>(0);
-  const areas = useAsync<Area[]>(() => supabase.from('areas').select('*').order('sort_order'));
+  const px = useParallax();
+  const areas = useAsync<Area[]>(() => supabase.from('areas').select('*').eq('is_historical', false).order('sort_order'));
   const period = useAsync<Period>(() => supabase.from('periods').select('*').eq('is_current', true).maybeSingle());
   const team = useAsync<Membership[]>(() => supabase.from('memberships').select('*, members(*), periods!inner(is_current)').eq('periods.is_current', true).order('sort_order'));
   const projects = useAsync<Project[]>(() => supabase.from('projects').select('*').order('is_featured', { ascending: false }).order('sort_order').limit(6));
@@ -51,13 +53,15 @@ export default function Home() {
     <>
       {/* ───────── HERO ───────── */}
       <section className="relative overflow-hidden bg-cream-gradient">
+        <div className="aurora absolute inset-0" />
+        <Blobs />
         <div className="dot-grid absolute inset-0 opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-        <Constellation className="pointer-events-none absolute -left-10 top-24 hidden w-80 opacity-60 lg:block" />
+        <div style={px(-25)} className="pointer-events-none absolute -left-10 top-24 hidden w-80 lg:block"><Constellation className="w-full opacity-60" /></div>
         <div className="container-x relative grid items-center gap-10 pb-16 pt-12 md:grid-cols-[1.1fr_1fr] md:pb-24 md:pt-16">
-          <div>
-            <span className="eyebrow bg-white/80 shadow-sm"><Sparkle className="h-3.5 w-3.5" /> Círculo de Gestión de Proyectos</span>
+          <div className="animate-fadeup">
+            <span className="eyebrow bg-white/80 shadow-sm"><Sparkle className="h-3.5 w-3.5 animate-spinslow" /> Círculo de Gestión de Proyectos</span>
             <h1 className="mt-6 font-display text-[2.9rem] font-black leading-[0.98] tracking-tight sm:text-7xl">
-              Imagina<br />y hazlo <span className="relative inline-block text-brand">realidad<Sparkle className="absolute -right-7 -top-4 h-7 w-7 animate-twinkle sm:-right-9 sm:h-9 sm:w-9" /></span>.
+              Imagina<br />y hazlo <span className="text-shine relative inline-block">realidad<Sparkle className="absolute -right-7 -top-4 h-7 w-7 animate-twinkle sm:-right-9 sm:h-9 sm:w-9" /></span>.
             </h1>
             <p className="mt-6 max-w-lg text-lg text-ink/65">{settings.purpose || 'Convertimos el potencial de las personas y las ideas en proyectos que generan valor, aprendizaje e impacto sostenible.'}</p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -71,16 +75,17 @@ export default function Home() {
               </div>
             )}
           </div>
-          <div className="relative mx-auto aspect-square w-full max-w-[460px]">
-            <div className="absolute inset-[6%] overflow-hidden rounded-full bg-brand shadow-[0_40px_80px_-20px_rgba(255,81,23,.6)]">
+          <div className="relative mx-auto aspect-square w-full max-w-[460px] animate-fadeup [animation-delay:.2s]">
+            <span className="absolute inset-[6%] rounded-full bg-brand/40 animate-pulsering [animation-duration:3.5s]" />
+            <div style={px(12)} className="absolute inset-[6%] overflow-hidden rounded-full bg-brand shadow-[0_40px_80px_-20px_rgba(255,81,23,.6)]">
               <Constellation className="absolute inset-0 h-full w-full opacity-90" color="#fff" />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-700/40 to-transparent" />
             </div>
-            <Donut className="absolute -left-2 top-4 h-24 w-24 animate-spinslow drop-shadow-lg sm:h-28 sm:w-28" />
+            <div style={px(-30)} className="absolute -left-2 top-4"><Donut className="h-24 w-24 animate-spinslow drop-shadow-lg sm:h-28 sm:w-28" /></div>
             <Sparkle className="absolute right-6 top-10 h-10 w-10 animate-twinkle" color="#fff" />
             <Sparkle className="absolute bottom-24 left-2 h-6 w-6 animate-twinkle [animation-delay:1s]" />
-            <Scrummy className="absolute bottom-0 left-1/2 h-[96%] -translate-x-1/2" />
-            <div className="absolute -right-1 bottom-10 rounded-2xl bg-ink px-4 py-3 text-white shadow-xl sm:-right-4">
+            <div style={px(22)} className="absolute inset-x-0 bottom-0 h-[96%]"><Scrummy className="mx-auto h-full animate-float" /></div>
+            <div style={px(-14)} className="absolute -right-1 bottom-10 rounded-2xl bg-ink px-4 py-3 text-white shadow-xl sm:-right-4">
               <p className="text-xs text-white/60">¡Hola! Soy</p>
               <p className="font-display text-lg font-extrabold text-brand-400">Scrummy 🦫</p>
             </div>
@@ -93,7 +98,7 @@ export default function Home() {
       {stats.length > 0 && (
         <section className="bg-ink pb-10 text-white">
           <div className={`container-x grid gap-6 pt-2 text-center ${stats.length > 2 ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2'}`}>
-            {stats.map(([v, l]) => <div key={l}><p className="font-display text-4xl font-black text-brand">{v}</p><p className="text-sm text-white/60">{l}</p></div>)}
+            {stats.map(([v, l]) => <div key={l}><p className="font-display text-4xl font-black text-brand"><CountUp value={v} /></p><p className="text-sm text-white/60">{l}</p></div>)}
           </div>
         </section>
       )}
@@ -101,13 +106,13 @@ export default function Home() {
       {/* ───────── NOSOTROS ───────── */}
       <section id="nosotros" className="scroll-mt-20 py-20 sm:py-28">
         <div className="container-x grid items-center gap-12 lg:grid-cols-2">
-          <div className="relative">
+          <Reveal className="relative">
             <img src="/media/gallery/comunidad-2025-2.webp" alt="Comunidad CIPRO" className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-2xl" />
             <img src="/media/gallery/entry-members-2026-2-1.webp" alt="" className="absolute -bottom-8 -right-3 hidden w-48 rotate-3 rounded-2xl border-[6px] border-white object-cover shadow-xl sm:block" />
             <div className="absolute -left-4 -top-5 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold shadow-lg"><Donut className="h-6 w-6" /> +{settings.founded_years || 10} años</div>
-            <Sparkle className="absolute -right-5 -top-6 h-12 w-12" />
-          </div>
-          <div>
+            <Sparkle className="absolute -right-5 -top-6 h-12 w-12 animate-twinkle" />
+          </Reveal>
+          <Reveal delay={150}>
             <span className="eyebrow">Quiénes somos</span>
             <h2 className="section-title">Una comunidad que <span className="text-brand">aprende haciendo</span></h2>
             <p className="mt-5 text-ink/65">CIPRO es una comunidad de aprendizaje y práctica en gestión de proyectos que desarrolla talento mediante formación, proyectos reales, investigación aplicada, liderazgo progresivo y alianzas con organizaciones. Integramos enfoques predictivos, ágiles e híbridos según la naturaleza de cada proyecto.</p>
@@ -115,22 +120,23 @@ export default function Home() {
               <div className="rounded-3xl bg-brand p-6 text-white"><p className="text-xs font-bold uppercase tracking-[.2em] text-white/70">Misión</p><p className="mt-2 text-sm leading-relaxed">{settings.mission}</p></div>
               <div className="rounded-3xl bg-ink p-6 text-white"><p className="text-xs font-bold uppercase tracking-[.2em] text-brand">Visión</p><p className="mt-2 text-sm leading-relaxed">{settings.vision}</p></div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ───────── PILARES (la "O" de CIPRO) ───────── */}
       <section className="relative overflow-hidden bg-cream py-20 sm:py-28">
+        <Blobs />
         <div className="dot-grid absolute inset-0 opacity-50" />
         <div className="container-x relative grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
-          <div className="relative mx-auto w-full max-w-sm">
+          <Reveal className="relative mx-auto w-full max-w-sm">
             <Donut className="w-full drop-shadow-xl" active={pillar} onHover={setPillar} />
             <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
               <div><p className="font-display text-3xl font-black">{pillar != null ? PILARES[pillar][0] : 'CIPRO'}</p><p className="text-xs font-semibold uppercase tracking-widest text-ink/50">pilar {pillar != null ? pillar + 1 : ''}</p></div>
             </div>
             <Sparkle className="absolute -right-2 -top-2 h-14 w-14 animate-twinkle" />
-          </div>
-          <div>
+          </Reveal>
+          <Reveal delay={150}>
             <span className="eyebrow bg-white">Nuestros 5 pilares</span>
             <h2 className="section-title">Cada segmento de nuestra <span className="text-brand">“O”</span> es un pilar</h2>
             <ul className="mt-8 space-y-2">
@@ -143,9 +149,9 @@ export default function Home() {
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-2">
               <span className="mr-1 text-sm font-semibold text-ink/50">Valores:</span>
-              {VALORES.map((v) => <span key={v} className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-brand-700 shadow-sm ring-1 ring-brand-100">{v}</span>)}
+              {VALORES.map((v) => <span key={v} className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-brand-700 shadow-sm ring-1 ring-brand-100 transition hover:-translate-y-0.5 hover:bg-brand hover:text-white">{v}</span>)}
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -158,11 +164,11 @@ export default function Home() {
               <h2 className="section-title">Nuestras áreas</h2>
               <p className="mt-3 text-ink/65">Una línea de gobierno combinada con un sistema transversal de proyectos.</p>
             </div>
-            <Scrummy pose="lado" className="hidden h-36 sm:block" />
+            <Scrummy pose="lado" className="hidden h-36 animate-float sm:block" />
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {areas.data?.map((a, i) => (
-              <Link to={`/integrantes?area=${a.slug}`} key={a.id} className="group relative overflow-hidden rounded-3xl border border-ink/5 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/10">
+              <Reveal key={a.id} delay={i * 80}><Link to={`/integrantes?area=${a.slug}`} className="group relative block h-full overflow-hidden rounded-3xl border border-ink/5 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/10">
                 <span className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-20 transition group-hover:scale-150" style={{ background: SEG[i % 5] }} />
                 <div className="relative flex items-center gap-3">
                   <span className="grid h-12 w-12 place-items-center rounded-2xl text-white transition group-hover:rotate-6" style={{ background: SEG[(i + 4) % 5] === '#FECAA3' ? '#FF5117' : SEG[(i + 4) % 5] }}><Icon name={a.icon || 'star'} className="h-6 w-6" /></span>
@@ -171,7 +177,7 @@ export default function Home() {
                 <h3 className="relative mt-4 text-lg font-bold">{a.name}</h3>
                 <p className="relative mt-2 text-sm text-ink/60">{a.description}</p>
                 <span className="relative mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand">Ver integrantes <Icon name="arrow" className="h-4 w-4 transition group-hover:translate-x-1" /></span>
-              </Link>
+              </Link></Reveal>
             ))}
           </div>
         </div>
@@ -179,12 +185,13 @@ export default function Home() {
 
       {/* ───────── DIRECTIVA ───────── */}
       <section className="relative overflow-hidden bg-cream-gradient py-20 sm:py-28">
+        <Blobs />
         <Constellation className="pointer-events-none absolute right-0 top-10 w-96 opacity-50" />
         <div className="container-x relative text-center">
           <span className="eyebrow bg-white">Directiva {period.data?.code}</span>
           <h2 className="section-title">Quienes lideran CIPRO</h2>
           <div className="mx-auto mt-10 grid max-w-2xl gap-6 sm:grid-cols-2">
-            {leaders.map((m) => <MemberCard key={m.id} member={m.members!} title={m.position_title} big />)}
+            {leaders.map((m, i) => <Reveal key={m.id} delay={i * 150}><Tilt><MemberCard member={m.members!} title={m.position_title} big /></Tilt></Reveal>)}
           </div>
           {settings.advisor_name && <p className="mt-8 text-sm text-ink/60">Docente encargado: <span className="font-semibold text-ink">{settings.advisor_name}</span></p>}
           <Link to="/integrantes" className="btn-dark mt-6">Ver a los {members.length} integrantes {period.data?.code} <Icon name="arrow" className="h-4 w-4" /></Link>
@@ -193,7 +200,9 @@ export default function Home() {
 
       {/* ───────── PROYECTOS (universo CIPRO) ───────── */}
       <section id="proyectos" className="relative scroll-mt-20 overflow-hidden bg-space py-20 text-white sm:py-28">
-        <div className="dot-grid-light absolute inset-0 opacity-40" />
+        <Blobs variant="dark" />
+        <Starfield count={70} />
+        <div className="dot-grid-light absolute inset-0 opacity-30" />
         <Constellation className="pointer-events-none absolute -right-10 top-8 w-[28rem] opacity-70" />
         {[['left-[8%] top-16', 0], ['right-[20%] top-[40%]', 0.8], ['left-[45%] bottom-12', 1.6]].map(([pos, d], i) => <Sparkle key={i} className={`absolute ${pos} h-5 w-5 animate-twinkle`} color="#fff" style={{ animationDelay: `${d}s` }} />)}
         <div className="container-x relative">
@@ -201,8 +210,8 @@ export default function Home() {
           <h2 className="section-title">Proyectos que hacemos <span className="text-brand">realidad</span></h2>
           <p className="mt-3 max-w-xl text-white/60">Cada proyecto se registra en nuestro portafolio con responsables, entregables, evidencias y lecciones aprendidas.</p>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.data?.map((p) => (
-              <article key={p.id} className="group overflow-hidden rounded-3xl bg-white/[.06] ring-1 ring-white/10 backdrop-blur transition hover:-translate-y-1 hover:bg-white/10 hover:ring-brand/60">
+            {projects.data?.map((p, i) => (
+              <Reveal key={p.id} delay={i * 120}><Tilt><article className="group overflow-hidden rounded-3xl bg-white/[.06] ring-1 ring-white/10 backdrop-blur transition hover:-translate-y-1 hover:bg-white/10 hover:ring-brand/60">
                 <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-brand to-brand-800">
                   {p.cover_url ? <img src={p.cover_url} alt="" loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="grid h-full place-items-center"><Donut className="h-24 w-24 opacity-80" /></div>}
                 </div>
@@ -214,7 +223,7 @@ export default function Home() {
                   <h3 className="mt-3 text-xl font-bold">{p.name}</h3>
                   <p className="mt-1 text-sm text-white/60">{p.summary}</p>
                 </div>
-              </article>
+              </article></Tilt></Reveal>
             ))}
           </div>
         </div>
@@ -222,8 +231,9 @@ export default function Home() {
 
       {/* ───────── SCRUMMY ───────── */}
       <section id="scrummy" className="relative scroll-mt-20 overflow-hidden py-20 sm:py-28" style={{ backgroundImage: 'url(/brand/fondo-crema.webp)', backgroundSize: 'cover' }}>
+        <Blobs />
         <div className="container-x relative grid items-center gap-10 lg:grid-cols-2">
-          <div>
+          <Reveal>
             <span className="eyebrow bg-white">Nuestra mascota</span>
             <h2 className="section-title">Conoce a <span className="text-brand">Scrummy</span></h2>
             <p className="mt-5 text-lg text-ink/70">Scrummy es un castor, y no por casualidad: en la naturaleza los castores son los grandes <b>gestores de proyectos</b>. Planifican, construyen en equipo y entregan represas que transforman su entorno.</p>
@@ -231,14 +241,14 @@ export default function Home() {
             <div className="mt-6 flex flex-wrap gap-2">
               {['Curioso', 'Colaborador', 'Ágil', 'Buena onda'].map((t) => <span key={t} className="rounded-full bg-ink px-4 py-1.5 text-sm font-semibold text-white">{t}</span>)}
             </div>
-          </div>
-          <div className="relative flex items-end justify-center gap-0 sm:gap-2">
+          </Reveal>
+          <Reveal delay={150} className="relative flex items-end justify-center gap-0 sm:gap-2">
             <div className="absolute bottom-0 left-1/2 h-3/4 w-3/4 -translate-x-1/2 rounded-full bg-brand/90 blur-0" />
             <Constellation className="absolute inset-x-0 top-0 w-full opacity-60" color="#fff" />
-            <Scrummy pose="chica-saludando" className="relative z-10 h-56 sm:h-72" />
-            <Scrummy pose="saludando" className="relative z-20 -mx-6 h-72 sm:h-96" />
-            <Scrummy pose="espalda" className="relative z-10 h-56 sm:h-72" />
-          </div>
+            <Scrummy pose="chica-saludando" className="relative z-10 h-56 animate-float [animation-delay:-1s] sm:h-72" />
+            <Scrummy pose="saludando" className="relative z-20 -mx-6 h-72 animate-float sm:h-96" />
+            <Scrummy pose="espalda" className="relative z-10 h-56 animate-float [animation-delay:-2.5s] sm:h-72" />
+          </Reveal>
         </div>
       </section>
 
@@ -249,7 +259,7 @@ export default function Home() {
           <h2 className="section-title">Alianzas y redes que nos impulsan</h2>
           <p className="mx-auto mt-3 max-w-xl text-ink/60">Círculos, organizaciones y empresas con quienes construimos proyectos, eventos y comunidad.</p>
           <div className="mt-12 grid grid-cols-3 gap-6 sm:grid-cols-4 lg:grid-cols-5">
-            {alliances.data?.map((a) => {
+            {alliances.data?.map((a, i) => {
               const inner = (
                 <>
                   <div className="mx-auto h-24 w-24 overflow-hidden rounded-full shadow-lg ring-4 ring-white transition group-hover:scale-105 group-hover:ring-brand sm:h-28 sm:w-28">
@@ -260,8 +270,8 @@ export default function Home() {
                 </>
               );
               return a.website_url
-                ? <a key={a.id} href={a.website_url} target="_blank" rel="noreferrer" className="group" title={a.description ?? ''}>{inner}</a>
-                : <div key={a.id} className="group" title={a.description ?? ''}>{inner}</div>;
+                ? <Reveal key={a.id} delay={(i % 5) * 70}><a href={a.website_url} target="_blank" rel="noreferrer" className="group block" title={a.description ?? ''}>{inner}</a></Reveal>
+                : <Reveal key={a.id} delay={(i % 5) * 70}><div className="group" title={a.description ?? ''}>{inner}</div></Reveal>;
             })}
           </div>
         </div>
@@ -274,7 +284,7 @@ export default function Home() {
             <div><span className="eyebrow bg-white">Novedades</span><h2 className="section-title">Últimas noticias</h2></div>
             <Link to="/noticias" className="btn-ghost bg-white">Ver todas</Link>
           </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">{news.data?.map((n) => <NewsCard key={n.id} n={n} />)}</div>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">{news.data?.map((n, i) => <Reveal key={n.id} delay={i * 120}><NewsCard n={n} /></Reveal>)}</div>
         </div>
       </section>
 
@@ -288,7 +298,7 @@ export default function Home() {
             </div>
             <div className="mt-10 grid auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[200px] md:grid-cols-4">
               {galleryPicks.map((g, i) => (
-                <Link to="/galeria" key={g.id} className={`group relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}>
+                <Link to="/galeria" key={g.id} style={{ animationDelay: `${i * 70}ms` }} className={`group relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}>
                   <img src={g.image_url} alt={g.title ?? ''} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                   <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent p-3 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">{g.title}</span>
                 </Link>
@@ -300,6 +310,8 @@ export default function Home() {
 
       {/* ───────── REDES ───────── */}
       <section className="relative overflow-hidden bg-ink py-20 text-white">
+        <Blobs variant="dark" />
+        <Starfield count={35} />
         <Constellation className="pointer-events-none absolute -left-10 bottom-0 w-96 opacity-50" />
         <div className="container-x relative">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -307,7 +319,7 @@ export default function Home() {
             {settings.instagram_url && <a href={settings.instagram_url} target="_blank" rel="noreferrer" className="btn-primary"><Icon name="instagram" className="h-4 w-4" /> Síguenos</a>}
           </div>
           <div className="-mx-4 mt-10 flex snap-x gap-4 overflow-x-auto px-4 pb-4">
-            {SOCIAL.map((s) => <img key={s} src={`/media/social/${s}.webp`} alt="Pieza de CIPRO en redes" loading="lazy" className="h-80 w-auto shrink-0 snap-start rounded-2xl object-cover ring-1 ring-white/10 sm:h-96" />)}
+            {SOCIAL.map((s) => <img key={s} src={`/media/social/${s}.webp`} alt="Pieza de CIPRO en redes" loading="lazy" className="h-80 w-auto shrink-0 snap-start rounded-2xl object-cover ring-1 ring-white/10 transition duration-500 hover:-translate-y-2 hover:rotate-1 hover:ring-brand sm:h-96" />)}
           </div>
         </div>
       </section>
@@ -315,7 +327,8 @@ export default function Home() {
       {/* ───────── ÚNETE ───────── */}
       <section id="unete" className="scroll-mt-20 py-20 sm:py-28">
         <div className="container-x">
-          <div className="relative overflow-hidden rounded-[2.5rem] bg-brand p-8 text-white sm:p-14">
+          <Reveal className="relative overflow-hidden rounded-[2.5rem] bg-brand p-8 text-white sm:p-14">
+            <Blobs variant="brand" />
             <Constellation className="absolute inset-0 h-full w-full opacity-40" color="#fff" />
             <Sparkle className="absolute right-[38%] top-8 h-8 w-8 animate-twinkle" color="#fff" />
             <div className="relative grid items-center gap-8 md:grid-cols-[1fr_auto]">
@@ -328,9 +341,9 @@ export default function Home() {
                   {!settings.join_form_url && settings.contact_email && <a href={`mailto:${settings.contact_email}`} className="btn border border-white/50 px-6 py-3 text-base hover:bg-white/10">Escríbenos</a>}
                 </div>
               </div>
-              <Scrummy pose="chica-saludando" className="mx-auto -mb-14 h-64 sm:-mb-14 sm:h-80" />
+              <Scrummy pose="chica-saludando" className="mx-auto -mb-14 h-64 animate-float sm:-mb-14 sm:h-80" />
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
     </>

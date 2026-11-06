@@ -5,6 +5,7 @@ import { useAsync } from '../lib/useQuery';
 import { ROLE_ORDER, type Area, type Membership, type Period } from '../lib/types';
 import MemberCard from '../components/MemberCard';
 import Scrummy from '../components/Scrummy';
+import { Blobs } from '../components/Motion';
 
 export default function Members() {
   const [params, setParams] = useSearchParams();
@@ -44,6 +45,7 @@ export default function Members() {
   return (
     <div className="pb-20">
       <section className="relative overflow-hidden bg-cream-gradient py-14">
+        <Blobs />
         <div className="container-x flex flex-wrap items-center justify-between gap-6">
           <div>
             <span className="eyebrow">Equipo</span>
@@ -58,7 +60,7 @@ export default function Members() {
           </select>
           <div className="flex flex-wrap gap-2">
             <button onClick={() => { params.delete('area'); setParams(params); }} className={`rounded-full px-4 py-2 text-sm font-semibold ${!areaSlug ? 'bg-brand text-white' : 'bg-white ring-1 ring-ink/10'}`}>Todas</button>
-            {areas.data?.map((a) => (
+            {areas.data?.filter((a) => !a.is_historical).map((a) => (
               <button key={a.id} onClick={() => { params.set('area', a.slug); setParams(params); }} className={`rounded-full px-4 py-2 text-sm font-semibold ${areaSlug === a.slug ? 'bg-brand text-white' : 'bg-white ring-1 ring-ink/10'}`}>{a.short_name || a.name}</button>
             ))}
           </div>

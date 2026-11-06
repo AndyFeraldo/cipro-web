@@ -12,6 +12,7 @@ import MyProfile from './pages/MyProfile';
 import PublicProfile from './pages/PublicProfile';
 import Gallery from './pages/Gallery';
 import { SessionProvider } from './lib/session';
+import { ScrollProgress } from './components/Motion';
 
 function ScrollHandler() {
   const { pathname, hash } = useLocation();
@@ -22,7 +23,8 @@ function ScrollHandler() {
   return null;
 }
 function PublicLayout() {
-  return <><Navbar /><main><Outlet /></main><Footer /></>;
+  const { pathname } = useLocation();
+  return <><ScrollProgress /><Navbar /><main key={pathname} className="page-enter"><Outlet /></main><Footer /></>;
 }
 
 export default function App() {

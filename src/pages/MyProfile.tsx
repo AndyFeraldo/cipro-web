@@ -15,6 +15,7 @@ export default function MyProfile() {
   const [hist, setHist] = useState<Hist[]>([]);
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [busy, setBusy] = useState('');
+  const [ciproCode, setCiproCode] = useState('');
   const uid = session?.user.id;
 
   async function load() {
@@ -22,6 +23,8 @@ export default function MyProfile() {
     const { data: m } = await supabase.from('members').select('*').eq('user_id', uid).maybeSingle();
     if (!m) return;
     const { data: p } = await supabase.from('member_private').select('email,phone').eq('member_id', m.id).maybeSingle();
+    const { data: c } = await supabase.from('member_codes').select('code').eq('member_id', m.id).maybeSingle();
+    setCiproCode(c?.code ?? '');
     const { data: h } = await supabase.from('memberships').select('id,role,position_title,periods(code),areas(name)').eq('member_id', m.id);
     setMember(m);
     setHist(((h as unknown as Hist[]) || []).sort((a, b) => (b.periods?.code || '').localeCompare(a.periods?.code || '')));
@@ -45,7 +48,7 @@ export default function MyProfile() {
     if (!form.career.trim()) return setMsg({ ok: false, t: 'Selecciona tu carrera.' });
     setBusy('save');
     const { error } = await supabase.from('members').update({
-      full_name: form.full_name.trim(), university_code: n(form.university_code), career: n(form.career), linkedin_url: n(form.linkedin_url),
+      full_name: form.full_name.trim(), career: n(form.career), linkedin_url: n(form.linkedin_url),
       is_working: form.is_working, company: form.is_working ? n(form.company) : null, job_title: form.is_working ? n(form.job_title) : null,
       joined_on: form.joined_on ? `${form.joined_on}-01` : null, bio: n(form.bio),
     }).eq('id', member!.id);
@@ -130,6 +133,16 @@ export default function MyProfile() {
             </section>
           </div>
           <aside className="space-y-6">
+            <section className="relative overflow-hidden rounded-3xl bg-ink p-6 text-white shadow-sm">
+              <div className="dot-grid-light absolute inset-0 opacity-40" />
+              <div className="relative">
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-brand-300">Tu acceso</p>
+                <p className="mt-3 text-sm text-white/60">Usuario (código Ulima)</p>
+                <p className="font-mono text-xl font-bold">{member.university_code || '—'}</p>
+                <p className="mt-3 text-sm text-white/60">Tu código CIPRO</p>
+                <p className="font-mono text-2xl font-black tracking-[.25em] text-brand">{ciproCode || '—'}</p>
+              </div>
+            </section>
             <section className="rounded-3xl bg-white p-6 shadow-sm">
               <h2 className="text-lg font-extrabold">Mi Carrera Cipriana</h2>
               <ol className="mt-4 space-y-3 border-l-2 border-brand-200 pl-5">
