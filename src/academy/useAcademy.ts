@@ -30,6 +30,9 @@ export function useAcademy() {
 export function courseSteps(c: Course, progress: Record<string, ProgressRow>) {
   const steps = [...c.lessons.map((l) => ({ slug: l.slug, title: l.title, minutes: l.minutes })), ...(c.final.length ? [{ slug: FINAL_SLUG, title: 'Examen final', minutes: 20 }] : [])];
   const done = steps.filter((s) => progress[`${c.slug}/${s.slug}`]?.passed).length;
-  const next = steps.find((s) => !progress[`${c.slug}/${s.slug}`]?.passed) ?? steps[steps.length - 1];
-  return { steps, done, total: steps.length, pct: steps.length ? Math.round((done / steps.length) * 100) : 0, next };
+  const firstOpen = steps.findIndex((s) => !progress[`${c.slug}/${s.slug}`]?.passed);
+  const next = firstOpen === -1 ? steps[steps.length - 1] : steps[firstOpen];
+  // Bloqueo secuencial: solo se puede abrir hasta el primer paso aún no aprobado
+  const isUnlocked = (slug: string) => firstOpen === -1 || steps.findIndex((s) => s.slug === slug) <= firstOpen;
+  return { steps, done, total: steps.length, pct: steps.length ? Math.round((done / steps.length) * 100) : 0, next, isUnlocked };
 }

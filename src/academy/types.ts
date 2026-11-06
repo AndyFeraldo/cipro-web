@@ -1,4 +1,5 @@
 import type { Pose } from '../components/Scrummy';
+import type { VisualName } from './Visuals';
 
 export type Block =
   | { t: 'p'; text: string }
@@ -8,7 +9,11 @@ export type Block =
   | { t: 'cards'; items: [string, string][] }
   | { t: 'table'; head: string[]; rows: string[][] }
   | { t: 'tip'; pose?: Pose; title: string; text: string }
-  | { t: 'key'; text: string };
+  | { t: 'key'; text: string }
+  | { t: 'visual'; name: VisualName }
+  | { t: 'example'; emoji: string; title: string; text: string; items?: string[] }
+  | { t: 'flip'; title: string; items: [string, string][] }
+  | { t: 'download'; title: string; text: string; href: string };
 
 export type Question = { q: string; options: string[] };
 export type Lesson = { slug: string; title: string; minutes: number; summary: string; blocks: Block[]; quiz?: Question[] };

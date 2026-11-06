@@ -63,10 +63,12 @@ export default function CoursePage() {
             {s.steps.map((st, i) => {
               const p = progress[`${c.slug}/${st.slug}`];
               const isFinal = st.slug === 'examen-final';
+              const locked = isMember && !s.isUnlocked(st.slug);
               return (
                 <Reveal as="li" key={st.slug} delay={i * 60}>
-                  <Link to={isMember ? `/academia/${c.slug}/${st.slug}` : `/acceso?next=/academia/${c.slug}/${st.slug}`} className={`group flex items-center gap-4 rounded-2xl p-4 ring-1 transition hover:-translate-y-0.5 hover:shadow-lg ${isFinal ? 'bg-ink text-white ring-ink' : 'bg-white ring-ink/5'}`}>
-                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sm font-black ${p?.passed ? 'bg-green-500 text-white' : isFinal ? 'bg-brand text-white' : 'bg-brand-50 text-brand-700'}`}>{p?.passed ? '✓' : isFinal ? '🎓' : i + 1}</span>
+                  <Link to={!isMember ? `/acceso?next=/academia/${c.slug}/${st.slug}` : locked ? '#' : `/academia/${c.slug}/${st.slug}`} onClick={(e) => locked && e.preventDefault()} aria-disabled={locked}
+                    className={`group flex items-center gap-4 rounded-2xl p-4 ring-1 transition ${locked ? 'cursor-not-allowed opacity-55' : 'hover:-translate-y-0.5 hover:shadow-lg'} ${isFinal ? 'bg-ink text-white ring-ink' : 'bg-white ring-ink/5'}`}>
+                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-sm font-black ${p?.passed ? 'bg-green-500 text-white' : locked ? 'bg-ink/10 text-ink/40' : isFinal ? 'bg-brand text-white' : 'bg-brand-50 text-brand-700'}`}>{p?.passed ? '✓' : locked ? '🔒' : isFinal ? '🎓' : i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold group-hover:text-brand">{st.title}</p>
                       <p className={`text-sm ${isFinal ? 'text-white/60' : 'text-ink/55'}`}>{isFinal ? `${c.final.length} preguntas · aprueba con 70%` : `${st.minutes} min · ${c.lessons[i].summary}`}</p>
@@ -85,7 +87,7 @@ export default function CoursePage() {
           </div>
           <div className="rounded-3xl bg-ink p-6 text-white">
             <h3 className="font-extrabold">Requisitos del certificado</h3>
-            <ul className="mt-3 space-y-1 text-sm text-white/70"><li>• Aprobar el mini quiz de cada lección (60%)</li><li>• Aprobar el examen final (70%)</li><li>• Tener tu perfil cipriano activo</li></ul>
+            <ul className="mt-3 space-y-1 text-sm text-white/70"><li>• Avanzar en orden: cada lección se desbloquea al aprobar la anterior</li><li>• Aprobar el mini quiz de cada lección (60%)</li><li>• Aprobar el examen final (70%)</li><li>• Tener tu perfil cipriano activo</li></ul>
           </div>
         </aside>
       </div>

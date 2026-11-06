@@ -42,4 +42,9 @@ Se puede desplegar en Vercel o Netlify (build `npm run build`, carpeta `dist`). 
 - El contenido de los cursos vive en `src/academy/*.ts` (lecciones con bloques, preguntas sin respuestas).
 - Las **respuestas correctas solo están en la base de datos** (`academy_quiz_keys`, sin acceso público) y se califican en el servidor (`academy_submit_quiz`). No se guardan en este repositorio.
 - Para agregar o cambiar un curso: editar el `.ts`, y registrar sus lecciones y claves en `academy_courses`, `academy_lessons` y `academy_quiz_keys`.
+- Avance **secuencial**: cada lección se desbloquea al aprobar la anterior (validado también en el servidor con `academy_unlocked`).
+- Lecciones con gráficos (`src/academy/Visuals.tsx`), ejemplos cotidianos y minijuegos de tarjetas.
 - Aprobación: 60% por lección y 70% en el examen final. `academy_issue_certificate` emite el certificado solo si todo está aprobado; `academy_verify_certificate` lo valida públicamente.
+
+## Pruebas
+Las cuentas de prueba usan códigos Ulima `2999999x`. Al limpiar, borrar **solo esos correos exactos** (`2999999x@ciprianos.cipro.invalid`), nunca por dominio: las cuentas reales de ciprianos usan el mismo dominio interno.

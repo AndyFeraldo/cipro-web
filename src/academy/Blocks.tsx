@@ -1,6 +1,7 @@
 import Scrummy from '../components/Scrummy';
 import { Sparkle } from '../components/Brand';
 import type { Block } from './types';
+import { Example, FlipCards, Visual } from './Visuals';
 
 /** Renderiza el contenido de una lección con el estilo de marca. */
 export default function Blocks({ blocks }: { blocks: Block[] }) {
@@ -44,6 +45,16 @@ export default function Blocks({ blocks }: { blocks: Block[] }) {
               <Scrummy pose={b.pose || 'saludando'} className="-mb-5 h-28 shrink-0 sm:h-32" />
               <div className="pb-1"><p className="text-xs font-black uppercase tracking-widest text-brand-600">{b.title}</p><p className="mt-1 text-ink/80">{b.text}</p></div>
             </div>
+          );
+          case 'visual': return <Visual key={i} name={b.name} />;
+          case 'example': return <Example key={i} emoji={b.emoji} title={b.title} text={b.text} items={b.items} />;
+          case 'flip': return <FlipCards key={i} title={b.title} items={b.items} />;
+          case 'download': return (
+            <a key={i} href={b.href} target="_blank" rel="noreferrer" className="group flex items-center gap-4 rounded-2xl bg-ink p-4 text-white transition hover:bg-brand">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/10 text-2xl">📄</span>
+              <span className="flex-1"><b>{b.title}</b><br /><span className="text-sm text-white/70">{b.text}</span></span>
+              <span className="text-sm font-bold">Abrir ↗</span>
+            </a>
           );
           case 'key': return <div key={i} className="rounded-2xl bg-ink p-5 font-semibold text-white"><span className="mr-2 text-brand">✦</span>{b.text}</div>;
         }

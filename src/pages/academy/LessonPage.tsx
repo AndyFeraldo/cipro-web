@@ -28,6 +28,7 @@ export default function LessonPage() {
   const stepIdx = s.steps.findIndex((x) => x.slug === ls);
   const prev = s.steps[stepIdx - 1], next = s.steps[stepIdx + 1];
   const passed = !!progress[`${c.slug}/${ls}`]?.passed;
+  if (!s.isUnlocked(ls!)) return <Locked course={c.slug} title={s.steps[stepIdx]?.title} next={s.next} />;
 
   const Outline = (
     <nav className="space-y-1">
@@ -36,12 +37,14 @@ export default function LessonPage() {
       {s.steps.map((st, i) => {
         const ok = progress[`${c.slug}/${st.slug}`]?.passed;
         const active = st.slug === ls;
-        return (
-          <Link key={st.slug} to={`/academia/${c.slug}/${st.slug}`} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${active ? 'bg-brand text-white shadow' : 'hover:bg-brand-50'}`}>
-            <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-black ${ok ? 'bg-green-500 text-white' : active ? 'bg-white text-brand' : 'bg-ink/5 text-ink/50'}`}>{ok ? '✓' : st.slug === FINAL_SLUG ? '🎓' : i + 1}</span>
-            <span className="leading-tight">{st.title}</span>
-          </Link>
-        );
+        const open = s.isUnlocked(st.slug);
+        const inner = (<>
+          <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-black ${ok ? 'bg-green-500 text-white' : active ? 'bg-white text-brand' : open ? 'bg-brand-50 text-brand' : 'bg-ink/5 text-ink/30'}`}>{ok ? '✓' : !open ? '🔒' : st.slug === FINAL_SLUG ? '🎓' : i + 1}</span>
+          <span className="leading-tight">{st.title}</span>
+        </>);
+        return open
+          ? <Link key={st.slug} to={`/academia/${c.slug}/${st.slug}`} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${active ? 'bg-brand text-white shadow' : 'hover:bg-brand-50'}`}>{inner}</Link>
+          : <div key={st.slug} title="Aprueba la lección anterior para desbloquear" className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ink/35">{inner}</div>;
       })}
     </nav>
   );
@@ -76,7 +79,7 @@ export default function LessonPage() {
           </article>
           <div className="mt-6 flex justify-between gap-3">
             {prev ? <Link to={`/academia/${c.slug}/${prev.slug}`} className="btn-ghost bg-white">← {prev.title}</Link> : <span />}
-            {next && <Link to={`/academia/${c.slug}/${next.slug}`} className="btn-ghost bg-white">{next.title} →</Link>}
+            {next && (passed ? <Link to={`/academia/${c.slug}/${next.slug}`} className="btn-ghost bg-white">{next.title} →</Link> : <span className="btn cursor-not-allowed bg-white text-ink/35 ring-1 ring-ink/10">🔒 {next.title}</span>)}
           </div>
         </div>
       </div>
@@ -136,5 +139,20 @@ function Quiz({ course, lesson, questions, pass, final, onDone, onNext, nextLabe
         <button className="btn-primary mt-8 w-full py-3 sm:w-auto sm:px-10" disabled={!complete || busy} onClick={submit}>{busy ? 'Calificando…' : complete ? 'Enviar respuestas' : `Responde las ${questions.length} preguntas`}</button>
       )}
     </section>
+  );
+}
+
+function Locked({ course, title, next }: { course: string; title?: string; next: { slug: string; title: string } }) {
+  return (
+    <div className="grid min-h-[70vh] place-items-center bg-cream-gradient px-4 py-16">
+      <div className="card max-w-md text-center hover:translate-y-0">
+        <Scrummy pose="espalda" className="mx-auto h-40" />
+        <p className="mt-4 text-4xl">🔒</p>
+        <h1 className="mt-2 text-2xl font-black">“{title}” aún está bloqueada</h1>
+        <p className="mt-2 text-ink/60">Los cursos se recorren en orden: aprueba primero la lección anterior para desbloquear esta.</p>
+        <Link to={`/academia/${course}/${next.slug}`} className="btn-primary mt-6">Continuar con: {next.title} →</Link>
+        <Link to={`/academia/${course}`} className="mt-3 block text-sm text-brand">Ver el temario</Link>
+      </div>
+    </div>
   );
 }
