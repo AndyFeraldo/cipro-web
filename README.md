@@ -20,6 +20,8 @@ Web del Círculo de Gestión de Proyectos (CIPRO). Está hecha con React, Vite, 
 - Bucket público `media` para las imágenes. Solo el admin puede subir archivos.
 - Edge Function `member-account` (`supabase/functions/member-account`): auto-registro de ciprianos y asignación de contraseñas por el admin. Las cuentas de ciprianos usan `DNI@ciprianos.cipro.invalid` como usuario interno (no se envían correos).
 - Los auto-registros quedan con `status = 'pendiente'` hasta que el admin los apruebe (pestaña Integrantes → ⏳ Solicitudes). Un cipriano no puede cambiar su propio estado ni su DNI (triggers `members_guard` y `member_private_guard`).
+- **Integrantes ya cargados por la directiva**: el admin genera un *código de activación* de 6 caracteres (RPC `admin_create_invite`, se guarda solo su hash, vence en 30 días). El cipriano lo usa en `/acceso#activar` con su DNI para crear su contraseña (`member-account` → `activate`, máx. 10 intentos fallidos por IP/hora).
+- Ciclos desde 2021-1; el admin crea el siguiente con un clic (pestaña Ciclos) o desde la ficha del integrante.
 - Los admins se definen en la tabla `admin_emails` (el login del admin usa el código universitario → `código@aloe.ulima.edu.pe`).
 
 ## Desarrollo

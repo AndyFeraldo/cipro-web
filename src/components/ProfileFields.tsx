@@ -1,5 +1,6 @@
 import type { Area } from '../lib/types';
 import { MONTHS } from '../lib/types';
+import { OTHER_CAREER, ULIMA_CAREERS } from '../lib/careers';
 
 export type ProfileForm = {
   full_name: string; university_code: string; career: string; email: string; phone: string; linkedin_url: string;
@@ -19,7 +20,7 @@ export default function ProfileFields({ v, set, areas, showArea = true }: { v: P
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2"><label className="label">Nombre completo *</label><input className="input" required {...f('full_name')} /></div>
       <div><label className="label">Código universitario</label><input className="input" inputMode="numeric" placeholder="20204390" value={v.university_code} onChange={(e) => set({ ...v, university_code: e.target.value.replace(/\D/g, '') })} /></div>
-      <div><label className="label">Carrera</label><input className="input" placeholder="Ingeniería de Sistemas" {...f('career')} /></div>
+      <CareerField value={v.career} onChange={(career) => set({ ...v, career })} />
       <div>
         <label className="label">¿Cuándo ingresaste a CIPRO?</label>
         <div className="flex gap-2">
@@ -30,8 +31,8 @@ export default function ProfileFields({ v, set, areas, showArea = true }: { v: P
       {showArea && areas && (
         <div><label className="label">Área en la que estás</label><select className="input" {...f('area_id')}><option value="">Selecciona…</option>{areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
       )}
-      <div><label className="label">LinkedIn (opcional)</label><input className="input" placeholder="https://www.linkedin.com/in/…" {...f('linkedin_url')} /></div>
-      <div><label className="label">Correo (opcional)</label><input className="input" type="email" {...f('email')} /></div>
+      <div><label className="label">LinkedIn *</label><input className="input" type="url" required pattern=".*linkedin\.com/.*" title="Pega el enlace de tu perfil de LinkedIn" placeholder="https://www.linkedin.com/in/tu-perfil" {...f('linkedin_url')} /></div>
+      <div><label className="label">Correo *</label><input className="input" type="email" required placeholder="tucorreo@gmail.com" {...f('email')} /></div>
       <div><label className="label">Celular (opcional)</label><input className="input" inputMode="tel" {...f('phone')} /></div>
 
       <div className="sm:col-span-2 rounded-2xl bg-brand-50 p-4">
@@ -48,6 +49,23 @@ export default function ProfileFields({ v, set, areas, showArea = true }: { v: P
       </div>
       <div className="sm:col-span-2"><label className="label">Cuéntanos sobre ti</label><textarea className="input min-h-[100px]" maxLength={1000} placeholder="Tus intereses, lo que te apasiona de la gestión de proyectos…" {...f('bio')} /></div>
       <p className="sm:col-span-2 text-xs text-ink/50">🔒 Tu DNI, correo y celular son privados: no aparecen en la web.</p>
+    </div>
+  );
+}
+
+/** Desplegable con las carreras de la Universidad de Lima; "Otra carrera" permite escribirla. */
+function CareerField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const known = !value || ULIMA_CAREERS.includes(value);
+  const selectValue = known ? value : OTHER_CAREER;
+  return (
+    <div>
+      <label className="label">Carrera *</label>
+      <select className="input" required value={selectValue} onChange={(e) => onChange(e.target.value === OTHER_CAREER ? ' ' : e.target.value)}>
+        <option value="">Selecciona tu carrera…</option>
+        {ULIMA_CAREERS.map((c) => <option key={c}>{c}</option>)}
+        <option>{OTHER_CAREER}</option>
+      </select>
+      {!known && <input className="input mt-2" required autoFocus placeholder="Escribe tu carrera" value={value.trim()} onChange={(e) => onChange(e.target.value || ' ')} />}
     </div>
   );
 }

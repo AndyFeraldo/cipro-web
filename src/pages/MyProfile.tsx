@@ -40,6 +40,9 @@ export default function MyProfile() {
   const n = (s: string) => (s.trim() ? s.trim() : null);
   async function save() {
     if (!form.full_name.trim()) return setMsg({ ok: false, t: 'El nombre es obligatorio.' });
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return setMsg({ ok: false, t: 'Ingresa un correo válido.' });
+    if (!/linkedin\.com\//i.test(form.linkedin_url)) return setMsg({ ok: false, t: 'Ingresa el enlace de tu perfil de LinkedIn.' });
+    if (!form.career.trim()) return setMsg({ ok: false, t: 'Selecciona tu carrera.' });
     setBusy('save');
     const { error } = await supabase.from('members').update({
       full_name: form.full_name.trim(), university_code: n(form.university_code), career: n(form.career), linkedin_url: n(form.linkedin_url),

@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { ROLE_LABEL, ROLE_ORDER, type Area, type Member, type Membership, type Period, type Role } from '../../lib/types';
 import ImageInput from './ImageInput';
 import { callMemberAccount } from '../../lib/session';
+import { ULIMA_CAREERS } from '../../lib/careers';
 
 type Edit = Partial<Member> & { dni?: string; origDni?: string; email?: string; phone?: string; code?: string };
 type MRow = Membership & { members: Member };
@@ -18,6 +19,7 @@ export default function MembersAdmin() {
   const [areaId, setAreaId] = useState('');
   const [q, setQ] = useState('');
   const [onlyPending, setOnlyPending] = useState(false);
+  const [invite, setInvite] = useState<{ name: string; code: string } | null>(null);
   const [edit, setEdit] = useState<Edit | null>(null);
   const [msg, setMsg] = useState('');
   const [newMs, setNewMs] = useState<{ period_id: string; area_id: string; role: Role; position_title: string }>({ period_id: '', area_id: '', role: 'miembro', position_title: '' });
@@ -44,7 +46,8 @@ export default function MembersAdmin() {
 
   async function open(m?: Member) {
     setMsg('');
-    if (!m) { setEdit({ full_name: '', is_active: true, status: 'aprobado', code: genCode() }); setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' }); return; }
+    if (!m) { setEdit({ full_name: '', is_active: true, status: 'aprobado', code: '' }); setInvite(null); setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' }); return; }
+    setInvite(null);
     const { data } = await supabase.from('member_private').select('dni,email,phone').eq('member_id', m.id).maybeSingle();
     setEdit({ ...m, dni: data?.dni ?? '', origDni: data?.dni ?? '', email: data?.email ?? '', phone: data?.phone ?? '', code: '' });
     setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' });
@@ -96,9 +99,25 @@ export default function MembersAdmin() {
 
   const pCode = (id: string) => periods.find((p) => p.id === id)?.code;
   const aName = (id: string | null) => areas.find((a) => a.id === id)?.short_name || areas.find((a) => a.id === id)?.name || '—';
+  async function createPeriod() {
+    const code = prompt('Código del nuevo ciclo (ej. 2027-1 o 2020-2):')?.trim();
+    if (!code) return;
+    if (!/^\d{4}-[12]$/.test(code)) { setMsg('El ciclo debe tener el formato AAAA-1 o AAAA-2 (ej. 2027-1).'); return; }
+    const y = Number(code.slice(0, 4)), s = code.endsWith('1') ? 1 : 2;
+    const { data, error } = await supabase.from('periods').insert({ code, label: `Ciclo ${code}`, starts_on: `${y}-${s === 1 ? '03' : '08'}-01`, ends_on: `${y}-${s === 1 ? '07-31' : '12-31'}` }).select('id').single();
+    if (error) { setMsg(error.message.includes('duplicate') ? `El ciclo ${code} ya existe.` : error.message); return; }
+    await load(); setNewMs((n) => ({ ...n, period_id: data.id })); setMsg(`Ciclo ${code} creado ✔`);
+  }
+  async function makeInvite() {
+    if (!edit?.id) return;
+    const { data, error } = await supabase.rpc('admin_create_invite', { p_member_id: edit.id });
+    if (error) { setMsg(error.message); return; }
+    setInvite({ name: edit.full_name || '', code: data as string });
+  }
+
   const MsForm = (
     <div className="grid gap-2 sm:grid-cols-2">
-      <select className="input" value={newMs.period_id} onChange={(e) => setNewMs({ ...newMs, period_id: e.target.value })}><option value="">Ciclo…</option>{periods.map((p) => <option key={p.id} value={p.id}>{p.code}</option>)}</select>
+      <select className="input" value={newMs.period_id} onChange={(e) => (e.target.value === '__new' ? createPeriod() : setNewMs({ ...newMs, period_id: e.target.value }))}><option value="">Ciclo…</option>{periods.map((p) => <option key={p.id} value={p.id}>{p.code}{p.is_current ? ' (actual)' : ''}</option>)}<option value="__new">＋ Crear nuevo ciclo…</option></select>
       <select className="input" value={newMs.area_id} onChange={(e) => setNewMs({ ...newMs, area_id: e.target.value })}><option value="">Área…</option>{areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
       <select className="input" value={newMs.role} onChange={(e) => setNewMs({ ...newMs, role: e.target.value as Role })}>{ROLE_ORDER.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</select>
       <input className="input" placeholder="Cargo visible (ej. Coordinadora PMO)" value={newMs.position_title} onChange={(e) => setNewMs({ ...newMs, position_title: e.target.value })} />
@@ -132,6 +151,7 @@ export default function MembersAdmin() {
                   <p className="truncate text-xs text-ink/50">{mine.map((r) => `${pCode(r.period_id)} · ${aName(r.area_id)} · ${r.position_title || ROLE_LABEL[r.role]}`).join('  |  ') || 'Sin ciclo asignado'}</p>
                 </div>
                 {m.linkedin_url && <span className="text-xs font-bold text-[#0A66C2]">in</span>}
+                <span title={m.user_id ? 'Tiene cuenta' : 'Sin cuenta'} className={`h-2.5 w-2.5 shrink-0 rounded-full ${m.user_id ? 'bg-green-500' : 'bg-ink/15'}`} />
               </li>
             );
           })}
@@ -154,7 +174,7 @@ export default function MembersAdmin() {
             )}
             <div><label className="label">Foto</label><ImageInput value={edit.photo_url ?? ''} folder="members" onChange={(v) => setEdit({ ...edit, photo_url: v })} /></div>
             <div><label className="label">Nombre completo *</label><input className="input" value={edit.full_name ?? ''} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} /></div>
-            <div><label className="label">Carrera</label><input className="input" value={edit.career ?? ''} onChange={(e) => setEdit({ ...edit, career: e.target.value })} placeholder="Ingeniería de Sistemas" /></div>
+            <div><label className="label">Carrera</label><input className="input" list="ulima-careers" value={edit.career ?? ''} onChange={(e) => setEdit({ ...edit, career: e.target.value })} placeholder="Elige o escribe…" /><datalist id="ulima-careers">{ULIMA_CAREERS.map((c) => <option key={c} value={c} />)}</datalist></div>
             <div><label className="label">LinkedIn (URL)</label><input className="input" value={edit.linkedin_url ?? ''} onChange={(e) => setEdit({ ...edit, linkedin_url: e.target.value })} placeholder="https://www.linkedin.com/in/…" /></div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div><label className="label">Código universitario</label><input className="input" value={edit.university_code ?? ''} onChange={(e) => setEdit({ ...edit, university_code: e.target.value.replace(/\D/g, '') })} /></div>
@@ -165,6 +185,21 @@ export default function MembersAdmin() {
             <div><label className="label">Bio corta</label><textarea className="input" value={edit.bio ?? ''} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} /></div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-brand" checked={edit.is_active ?? true} onChange={(e) => setEdit({ ...edit, is_active: e.target.checked })} /> Visible en la web</label>
 
+            {edit.id && !edit.user_id && (
+              <div className="rounded-2xl bg-brand-50 p-4 ring-1 ring-brand-100">
+                <p className="text-sm font-bold">🎟️ Aún no tiene cuenta en “Soy cipriano”</p>
+                <p className="mt-1 text-xs text-ink/60">Genera un código de activación y envíaselo. Con él crea su propia contraseña y luego edita su perfil. Vence en 30 días.</p>
+                {invite ? (
+                  <div className="mt-3 rounded-xl bg-white p-3 text-center">
+                    <p className="text-xs text-ink/50">Código para {invite.name}</p>
+                    <p className="my-1 font-mono text-3xl font-black tracking-[.3em] text-brand">{invite.code}</p>
+                    <button className="btn-ghost py-1 text-xs" onClick={() => navigator.clipboard?.writeText(`¡Hola ${invite.name.split(' ')[0]}! Activa tu perfil cipriano en ${location.origin}/acceso#activar con este código: ${invite.code}`)}>📋 Copiar mensaje para enviar</button>
+                    <p className="mt-2 text-[11px] text-ink/50">Anótalo: no se vuelve a mostrar. Si lo pierdes, genera otro (el anterior deja de servir).</p>
+                  </div>
+                ) : <button className="btn-primary mt-3 w-full py-2" onClick={makeInvite}>Generar código de activación</button>}
+              </div>
+            )}
+
             <div className="rounded-2xl bg-ink/[.03] p-4">
               <p className="text-xs font-bold uppercase tracking-wide text-ink/60">🔒 Datos privados (no se muestran en la web)</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -172,7 +207,7 @@ export default function MembersAdmin() {
                 <div><label className="label">Celular</label><input className="input" value={edit.phone ?? ''} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} /></div>
                 <div className="sm:col-span-2"><label className="label">Correo</label><input className="input" type="email" value={edit.email ?? ''} onChange={(e) => setEdit({ ...edit, email: e.target.value })} /></div>
               </div>
-              <label className="label mt-3">Contraseña de acceso {edit.user_id ? <span className="normal-case text-green-700">(ya tiene cuenta; escribe una solo si quieres cambiársela)</span> : <span className="normal-case">(para que entre en “Soy cipriano”)</span>}</label>
+              <label className="label mt-3">{edit.user_id ? <>Restablecer contraseña <span className="normal-case text-green-700">(ya tiene cuenta; úsalo solo si la olvidó)</span></> : <>Contraseña de acceso <span className="normal-case">(opcional: o usa el código de activación)</span></>}</label>
               <div className="flex gap-2"><input className="input font-mono" value={edit.code ?? ''} onChange={(e) => setEdit({ ...edit, code: e.target.value })} /><button type="button" className="btn-ghost py-1.5" onClick={() => setEdit({ ...edit, code: genCode() })}>Generar</button></div>
             </div>
 

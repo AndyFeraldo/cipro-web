@@ -6,6 +6,7 @@ import MembersAdmin from './MembersAdmin';
 import { CrudAdmin } from './CrudAdmin';
 import SettingsAdmin from './SettingsAdmin';
 import GalleryBulk from './GalleryBulk';
+import PeriodsAdmin from './PeriodsAdmin';
 
 const TABS = ['Integrantes', 'Ciclos', 'Áreas', 'Noticias', 'Proyectos', 'Alianzas', 'Galería', 'Marca y textos'] as const;
 
@@ -49,10 +50,7 @@ export default function AdminLayout() {
       {showPw && <ChangePassword email={session.user.email!} onClose={() => setShowPw(false)} />}
       <main className="container-x py-8">
         {tab === 'Integrantes' && <MembersAdmin />}
-        {tab === 'Ciclos' && <CrudAdmin table="periods" title="Ciclos" order="code" fields={[
-          { key: 'code', label: 'Código (ej. 2026-1)', required: true }, { key: 'label', label: 'Nombre' },
-          { key: 'starts_on', label: 'Inicio', type: 'date' }, { key: 'ends_on', label: 'Fin', type: 'date' },
-          { key: 'is_current', label: 'Ciclo actual (solo uno)', type: 'bool' }]} display={(r) => `${r.code}${r.is_current ? ' · ACTUAL' : ''}`} />}
+        {tab === 'Ciclos' && <PeriodsAdmin />}
         {tab === 'Áreas' && <CrudAdmin table="areas" title="Áreas" order="sort_order" fields={[
           { key: 'name', label: 'Nombre', required: true }, { key: 'slug', label: 'Identificador (sin espacios)', required: true },
           { key: 'short_name', label: 'Sigla' }, { key: 'description', label: 'Descripción', type: 'textarea' },
