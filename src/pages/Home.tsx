@@ -252,6 +252,29 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ───────── ACADEMIA ───────── */}
+      <section className="relative overflow-hidden bg-space py-20 text-white sm:py-28">
+        <Blobs variant="dark" />
+        <Starfield count={50} />
+        <div className="container-x relative grid items-center gap-10 lg:grid-cols-2">
+          <Reveal>
+            <span className="eyebrow bg-white/10 text-brand-300"><Sparkle className="h-3.5 w-3.5" /> Nuevo · Academia CIPRO</span>
+            <h2 className="section-title">Aprende gestión de proyectos <span className="text-shine">gratis</span> y certifícate</h2>
+            <p className="mt-4 max-w-xl text-white/70">Cursos cortos con Scrummy como guía: qué es un proyecto, Business Case, Acta de Constitución, EDT, enfoques ágiles y Scrum. Aprueba los quizzes y el examen final y desbloquea tu certificado CIPRO con código verificable.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/academia" className="btn-primary px-6 py-3 text-base">Ir a la Academia <Icon name="arrow" className="h-4 w-4" /></Link>
+              <Link to="/academia/fundamentos" className="btn border border-white/30 px-6 py-3 text-base hover:bg-white/10">Fundamentos (4 h)</Link>
+            </div>
+          </Reveal>
+          <Reveal delay={150} className="relative mx-auto flex items-end justify-center">
+            <div className="absolute bottom-0 h-3/4 w-3/4 rounded-full bg-brand/70 blur-2xl" />
+            <Scrummy pose="frente" className="relative h-72 animate-float sm:h-80" />
+            <div className="absolute left-0 top-6 rotate-[-6deg] rounded-2xl bg-white px-4 py-3 text-ink shadow-2xl"><p className="text-[10px] font-black uppercase tracking-widest text-brand">Certificado</p><p className="font-display font-extrabold">¡Desbloqueado! 🎓</p></div>
+            <div className="absolute bottom-10 right-0 rotate-[5deg] rounded-2xl bg-ink px-4 py-3 shadow-2xl ring-1 ring-white/10"><p className="text-xs text-white/60">Lección 3</p><p className="font-bold">Business Case y Acta ✓</p></div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ───────── ALIANZAS ───────── */}
       <section id="alianzas" className="scroll-mt-20 py-20 sm:py-28">
         <div className="container-x text-center">

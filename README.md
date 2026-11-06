@@ -11,6 +11,9 @@ Web del Círculo de Gestión de Proyectos (CIPRO). Está hecha con React, Vite, 
 | `/acceso` | **Soy cipriano**: ingresar con DNI + contraseña, o **registrarse** (queda pendiente de aprobación) |
 | `/mi-perfil` | El cipriano edita su perfil: foto, carrera, ingreso a CIPRO (mes/año), trabajo actual, LinkedIn, celular, descripción y hasta 8 fotos |
 | `/cipriano/:id` | Perfil público de cada cipriano aprobado |
+| `/academia` | **Academia CIPRO**: cursos gratuitos con lecciones, mini quizzes, examen final y certificado verificable |
+| `/academia/:curso/:leccion` | Reproductor de lecciones (requiere sesión de cipriano) |
+| `/academia/certificado/:codigo` | Certificado imprimible (A4) y verificación pública |
 | `/admin` | Panel de administración (código universitario + contraseña, cambio de contraseña con 🔑) |
 
 ## Base de datos (Supabase, proyecto "CIPRO PAG WEB")
@@ -34,3 +37,9 @@ Variables en `.env` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`). La clave pu
 
 ## Publicar
 Se puede desplegar en Vercel o Netlify (build `npm run build`, carpeta `dist`). `vercel.json` ya incluye el rewrite para las rutas del frontend.
+
+## Academia CIPRO
+- El contenido de los cursos vive en `src/academy/*.ts` (lecciones con bloques, preguntas sin respuestas).
+- Las **respuestas correctas solo están en la base de datos** (`academy_quiz_keys`, sin acceso público) y se califican en el servidor (`academy_submit_quiz`). No se guardan en este repositorio.
+- Para agregar o cambiar un curso: editar el `.ts`, y registrar sus lecciones y claves en `academy_courses`, `academy_lessons` y `academy_quiz_keys`.
+- Aprobación: 60% por lección y 70% en el examen final. `academy_issue_certificate` emite el certificado solo si todo está aprobado; `academy_verify_certificate` lo valida públicamente.

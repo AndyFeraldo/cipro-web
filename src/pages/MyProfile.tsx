@@ -4,6 +4,8 @@ import { supabase, uploadMedia } from '../lib/supabase';
 import { isMemberEmail, useSession } from '../lib/session';
 import { ROLE_LABEL, type Member, type Role } from '../lib/types';
 import ProfileFields, { emptyProfile, type ProfileForm } from '../components/ProfileFields';
+import { COURSES } from '../academy';
+import { courseSteps, useAcademy } from '../academy/useAcademy';
 
 type Hist = { id: string; role: Role; position_title: string | null; periods: { code: string } | null; areas: { name: string } | null };
 const MAX_PHOTOS = 8;
@@ -157,6 +159,7 @@ export default function MyProfile() {
                 {!hist.length && <li className="text-sm text-ink/60">La directiva agregará tus ciclos.</li>}
               </ol>
             </section>
+            <MyCourses />
             <PasswordBox />
           </aside>
         </div>
@@ -178,6 +181,30 @@ function PasswordBox() {
         setMsg(error ? error.message : 'Contraseña actualizada ✔'); setPw('');
       }}>Actualizar</button>
       {msg && <p className="mt-2 text-sm">{msg}</p>}
+    </section>
+  );
+}
+
+function MyCourses() {
+  const { progress, certs } = useAcademy();
+  const courses = COURSES.filter((c) => c.status === 'disponible');
+  return (
+    <section className="rounded-3xl bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between"><h2 className="text-lg font-extrabold">🎓 Academia CIPRO</h2><Link to="/academia" className="text-sm font-semibold text-brand">Ver cursos</Link></div>
+      <ul className="mt-4 space-y-3">
+        {courses.map((c) => {
+          const s = courseSteps(c, progress); const cert = certs.find((x) => x.course_slug === c.slug);
+          return (
+            <li key={c.slug}>
+              <Link to={cert ? `/academia/certificado/${cert.code}` : `/academia/${c.slug}`} className="block rounded-xl p-2 hover:bg-brand-50">
+                <p className="text-sm font-semibold">{c.title}</p>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink/5"><div className="h-full bg-brand" style={{ width: `${s.pct}%` }} /></div>
+                <p className="mt-0.5 text-xs text-ink/50">{cert ? '✓ Certificado obtenido' : `${s.pct}% completado`}</p>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

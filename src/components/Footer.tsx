@@ -21,6 +21,7 @@ export default function Footer() {
             <li><Link to="/integrantes" className="hover:text-brand-400">Integrantes por ciclo</Link></li>
             <li><Link to="/noticias" className="hover:text-brand-400">Noticias</Link></li>
             <li><Link to="/galeria" className="hover:text-brand-400">Galería</Link></li>
+            <li><Link to="/academia" className="hover:text-brand-400">🎓 Academia CIPRO</Link></li>
             <li><Link to="/#scrummy" className="hover:text-brand-400">Conoce a Scrummy</Link></li>
             <li><Link to="/acceso" className="hover:text-brand-400">Soy cipriano · Ingresar</Link></li>
             <li><Link to="/acceso#registro" className="hover:text-brand-400">Registrarme como cipriano</Link></li>

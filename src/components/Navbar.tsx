@@ -5,12 +5,13 @@ import { isMemberEmail, useSession } from '../lib/session';
 
 const Lock = ({ className = 'h-4 w-4' }) => <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><rect x="4" y="11" width="16" height="10" rx="2.5" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
 
-const links = [
+const links: { to: string; label: string; badge?: boolean }[] = [
   { to: '/#nosotros', label: 'Nosotros' },
   { to: '/#areas', label: 'Áreas' },
   { to: '/integrantes', label: 'Integrantes' },
   { to: '/#proyectos', label: 'Proyectos' },
   { to: '/#alianzas', label: 'Alianzas' },
+  { to: '/academia', label: 'Academia', badge: true },
   { to: '/galeria', label: 'Galería' },
   { to: '/noticias', label: 'Noticias' },
 ];
@@ -26,7 +27,7 @@ export default function Navbar() {
         <Link to="/" aria-label="Inicio"><Logo className="h-7 sm:h-8" /></Link>
         <div className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} className="rounded-full px-3 py-2 text-sm font-medium text-ink/70 hover:bg-brand-50 hover:text-brand-600">{l.label}</NavLink>
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => `relative rounded-full px-3 py-2 text-sm font-medium transition hover:bg-brand-50 hover:text-brand-600 ${isActive && l.to !== '/' && !l.to.includes('#') ? 'text-brand-600' : 'text-ink/70'} ${l.badge ? 'font-bold text-ink' : ''}`}>{l.label}{l.badge && <span className="absolute -right-1 -top-1 rounded-full bg-brand px-1.5 text-[9px] font-black uppercase text-white">Nuevo</span>}</NavLink>
           ))}
           <Link to={cta.to} className="btn-primary ml-2">{cta.label}</Link>
           <Link to="/admin" title="Panel de administración" aria-label="Panel de administración" className="ml-1 grid h-10 w-10 place-items-center rounded-full bg-ink text-white transition hover:bg-brand"><Lock /></Link>
@@ -38,7 +39,7 @@ export default function Navbar() {
       {open && (
         <div className="border-t border-ink/5 bg-white md:hidden">
           <div className="container-x flex flex-col py-2">
-            {links.map((l) => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="py-2.5 font-medium">{l.label}</Link>)}
+            {links.map((l) => <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="py-2.5 font-medium">{l.label}{l.badge && <span className="ml-2 rounded-full bg-brand px-1.5 text-[10px] font-black uppercase text-white">Nuevo</span>}</Link>)}
             <Link to={cta.to} onClick={() => setOpen(false)} className="btn-primary mt-2">{cta.label}</Link>
             <Link to="/admin" onClick={() => setOpen(false)} className="btn-dark my-2"><Lock /> Panel admin</Link>
           </div>

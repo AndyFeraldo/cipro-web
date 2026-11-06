@@ -11,6 +11,10 @@ import AdminLayout from './pages/admin/AdminLayout';
 import MyProfile from './pages/MyProfile';
 import PublicProfile from './pages/PublicProfile';
 import Gallery from './pages/Gallery';
+import AcademyHome from './pages/academy/AcademyHome';
+import CoursePage from './pages/academy/CoursePage';
+import LessonPage from './pages/academy/LessonPage';
+import Certificate, { Verify } from './pages/academy/Certificate';
 import { SessionProvider } from './lib/session';
 import { ScrollProgress } from './components/Motion';
 
@@ -38,6 +42,10 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/integrantes" element={<Members />} />
             <Route path="/galeria" element={<Gallery />} />
+            <Route path="/academia" element={<AcademyHome />} />
+            <Route path="/academia/verificar" element={<Verify />} />
+            <Route path="/academia/:course" element={<CoursePage />} />
+            <Route path="/academia/:course/:lesson" element={<LessonPage />} />
             <Route path="/noticias" element={<NewsList />} />
             <Route path="/noticias/:slug" element={<NewsDetail />} />
             <Route path="/acceso" element={<MemberAccess />} />
@@ -45,6 +53,7 @@ export default function App() {
             <Route path="/cipriano/:id" element={<PublicProfile />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />} />
+          <Route path="/academia/certificado/:code" element={<Certificate />} />
         </Routes>
       </BrowserRouter>
     </SettingsProvider>

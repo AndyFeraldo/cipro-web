@@ -21,10 +21,11 @@ const onlyDigits = (v: string) => v.replace(/\D/g, '').slice(0, 8);
 export default function MemberAccess() {
   const nav = useNavigate();
   const { session } = useSession();
-  const { hash } = useLocation();
+  const { hash, search } = useLocation();
+  const next = new URLSearchParams(search).get('next');
   const [tab, setTab] = useState<Tab>(() => fromHash(hash));
   useEffect(() => { setTab(fromHash(hash)); }, [hash]);
-  useEffect(() => { if (session && isMemberEmail(session.user.email)) nav('/mi-perfil'); }, [session, nav]);
+  useEffect(() => { if (session && isMemberEmail(session.user.email)) nav(next && next.startsWith('/') && !next.startsWith('//') ? next : '/mi-perfil'); }, [session, nav, next]);
 
   return (
     <div className="relative overflow-hidden bg-cream-gradient">
@@ -47,6 +48,7 @@ export default function MemberAccess() {
           <Scrummy pose="chica-saludando" className="mt-6 h-64 animate-float" />
         </div>
         <div className="w-full">
+          {next?.startsWith('/academia') && <p className="mx-auto mb-4 max-w-xl rounded-2xl bg-ink p-4 text-sm text-white">🎓 Ingresa (o activa tu cuenta) para empezar el curso en la <b className="text-brand">Academia CIPRO</b>. Volverás automáticamente.</p>}
           <div className="mx-auto mb-5 grid w-full max-w-xl grid-cols-3 rounded-full bg-white p-1 shadow-sm ring-1 ring-ink/5">
             {TABS.map((t) => (
               <button key={t.id} onClick={() => setTab(t.id)} className={`rounded-full px-2 py-2.5 text-[11px] font-bold leading-tight transition sm:text-sm ${tab === t.id ? 'bg-brand text-white shadow' : 'text-ink/60'}`}>{t.label}</button>

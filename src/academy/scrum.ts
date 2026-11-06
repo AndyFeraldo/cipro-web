@@ -1,0 +1,91 @@
+import type { Course } from './types';
+
+/** Curso 2 · Contenido original de CIPRO (referencias: Guía de Scrum 2020, Manifiesto Ágil). */
+export const scrum: Course = {
+  slug: 'scrum',
+  title: 'Scrum con Scrummy',
+  subtitle: 'Aprende el marco ágil más usado del mundo… de la mano del castor que lleva su nombre.',
+  level: 'Inicial',
+  hours: 3,
+  pose: 'frente',
+  accent: '#FE6F06',
+  status: 'disponible',
+  outcomes: [
+    'Entender el empirismo y los valores de Scrum.',
+    'Conocer los 3 roles, los 5 eventos y los 3 artefactos.',
+    'Escribir historias de usuario y estimar con story points.',
+    'Organizar un proyecto real de CIPRO con un tablero ágil.',
+  ],
+  lessons: [
+    {
+      slug: 'agil-y-scrum', title: 'Agilidad y los pilares de Scrum', minutes: 40,
+      summary: 'Por qué existe Scrum, el empirismo y sus cinco valores.',
+      blocks: [
+        { t: 'p', text: 'Scrum es un marco de trabajo liviano que ayuda a personas, equipos y organizaciones a generar valor mediante soluciones adaptativas para problemas complejos. No es una metodología rígida: define lo mínimo y deja espacio para que el equipo decida el “cómo”.' },
+        { t: 'h', text: 'Empirismo: los 3 pilares' },
+        { t: 'cards', items: [['Transparencia', 'El trabajo y el progreso son visibles para todos (por ejemplo, un tablero compartido).'], ['Inspección', 'Revisamos con frecuencia lo que hacemos y cómo avanzamos.'], ['Adaptación', 'Si algo no funciona, lo ajustamos lo antes posible.']] },
+        { t: 'h', text: 'Los 5 valores de Scrum' },
+        { t: 'list', items: ['Compromiso con los objetivos del equipo.', 'Foco en el trabajo del Sprint.', 'Apertura sobre el trabajo y los desafíos.', 'Respeto entre todos como personas capaces.', 'Coraje para hacer lo correcto y enfrentar problemas difíciles.'] },
+        { t: 'tip', pose: 'saludando', title: 'Scrummy dice', text: 'Los castores construyen su represa poco a poco, revisan si el agua se filtra y la reparan enseguida. ¡Eso es inspección y adaptación!' },
+        { t: 'key', text: 'Idea clave: Scrum se basa en el empirismo: tomar decisiones según lo que se observa, no solo según lo que se supuso.' },
+      ],
+      quiz: [
+        { q: '¿Cuáles son los tres pilares del empirismo en Scrum?', options: ['Planificación, ejecución y cierre', 'Transparencia, inspección y adaptación', 'Alcance, tiempo y costo', 'Compromiso, foco y respeto'] },
+        { q: 'Scrum es…', options: ['Una metodología rígida con documentos obligatorios', 'Un marco de trabajo liviano para problemas complejos', 'Un software de gestión', 'Un tipo de contrato'] },
+        { q: '¿Cuál de estos es un valor de Scrum?', options: ['Coraje', 'Jerarquía', 'Velocidad', 'Control'] },
+      ],
+    },
+    {
+      slug: 'roles-eventos-artefactos', title: 'Roles, eventos y artefactos', minutes: 50,
+      summary: 'Quién hace qué, cuándo se reúnen y qué herramientas usan.',
+      blocks: [
+        { t: 'h', text: 'El Scrum Team' },
+        { t: 'cards', items: [['Product Owner', 'Maximiza el valor del producto. Gestiona y ordena el Product Backlog. Es una sola persona.'], ['Scrum Master', 'Sirve al equipo: facilita, elimina impedimentos y ayuda a que todos entiendan y apliquen Scrum.'], ['Developers', 'Las personas que crean el incremento cada Sprint. Se autogestionan (no solo programadores: diseñadores, comunicadores, etc.).']] },
+        { t: 'h', text: 'Los 5 eventos' },
+        { t: 'steps', items: [['Sprint', 'Contenedor de todos los eventos. Duración fija de un mes o menos.'], ['Sprint Planning', 'Se define el porqué (Sprint Goal), el qué y el cómo del Sprint.'], ['Daily Scrum', '15 minutos diarios para inspeccionar el avance hacia el Sprint Goal.'], ['Sprint Review', 'Se muestra el resultado a los interesados y se ajusta lo que viene.'], ['Sprint Retrospective', 'El equipo mejora su forma de trabajar.']] },
+        { t: 'h', text: 'Los 3 artefactos (y sus compromisos)' },
+        { t: 'table', head: ['Artefacto', 'Qué es', 'Compromiso'], rows: [['Product Backlog', 'Lista ordenada de todo lo que podría necesitar el producto', 'Product Goal'], ['Sprint Backlog', 'Lo elegido para el Sprint + el plan para lograrlo', 'Sprint Goal'], ['Incremento', 'Paso concreto y utilizable hacia el Product Goal', 'Definition of Done']] },
+        { t: 'tip', pose: 'lado', title: 'Error común', text: 'La Daily no es una reunión para reportar al jefe: es del equipo y para el equipo. ¡Y dura 15 minutos!' },
+        { t: 'key', text: 'Idea clave: 3 roles · 5 eventos · 3 artefactos.' },
+      ],
+      quiz: [
+        { q: '¿Quién ordena y gestiona el Product Backlog?', options: ['El Scrum Master', 'Los Developers', 'El Product Owner', 'El sponsor'] },
+        { q: '¿Cuánto dura como máximo un Sprint?', options: ['Una semana', 'Un mes', 'Tres meses', 'Lo que el equipo quiera'] },
+        { q: 'El compromiso del Incremento es…', options: ['La Definition of Done', 'El Sprint Goal', 'El Product Goal', 'El presupuesto'] },
+      ],
+    },
+    {
+      slug: 'scrum-en-cipro', title: 'Scrum en la práctica: el caso CIPRO', minutes: 50,
+      summary: 'Historias de usuario, estimación y tablero para organizar un proyecto real.',
+      blocks: [
+        { t: 'h', text: 'Historias de usuario' },
+        { t: 'p', text: 'Describen una necesidad desde la perspectiva de quien la usa: “Como [rol], quiero [algo] para [beneficio]”. Ejemplo: “Como participante de la Ciprothon, quiero ver las bases en la web para inscribirme sin dudas”.' },
+        { t: 'p', text: 'Una buena historia cumple INVEST: Independiente, Negociable, Valiosa, Estimable, pequeña (Small) y Testeable.' },
+        { t: 'h', text: 'Estimación' },
+        { t: 'p', text: 'Los equipos suelen estimar en story points (esfuerzo relativo, no horas) con Planning Poker: cada quien elige una carta (1, 2, 3, 5, 8, 13…) y se conversa cuando hay diferencias.' },
+        { t: 'h', text: 'Tablero y flujo' },
+        { t: 'table', head: ['Por hacer', 'En curso', 'Hecho'], rows: [['Diseñar piezas de difusión', 'Redactar bases', 'Reservar ambiente'], ['Contactar sponsor', 'Formulario de inscripción', 'Definir fecha']] },
+        { t: 'list', items: ['Limita el trabajo en curso (WIP) para terminar antes de empezar más cosas.', 'Un burndown chart muestra cuánto trabajo queda en el Sprint.'] },
+        { t: 'h', text: 'Caso: la Ciprothon en 3 sprints' },
+        { t: 'steps', items: [['Sprint 1 · Lanzamiento', 'Bases, formulario y piezas de difusión publicadas.'], ['Sprint 2 · Convocatoria', 'Alianzas con círculos, sponsor confirmado, inscripciones.'], ['Sprint 3 · Evento', 'Logística, jurado, ejecución y retrospectiva final.']] },
+        { t: 'tip', pose: 'chica-saludando', title: 'Reto', text: 'Toma tu próximo proyecto en CIPRO y escribe 5 historias de usuario. ¡Llévalas a tu equipo en la siguiente Sprint Planning!' },
+        { t: 'key', text: 'Idea clave: Scrum funciona mejor con objetivos claros por Sprint, trabajo visible y mejora continua.' },
+      ],
+      quiz: [
+        { q: '¿Cuál es el formato típico de una historia de usuario?', options: ['Tarea – fecha – responsable', 'Como [rol], quiero [algo] para [beneficio]', 'Problema – causa – solución', 'Entrada – proceso – salida'] },
+        { q: 'Los story points miden…', options: ['Horas exactas de trabajo', 'Esfuerzo relativo', 'El costo en soles', 'La cantidad de personas'] },
+        { q: '¿Para qué sirve limitar el WIP (trabajo en curso)?', options: ['Para trabajar más horas', 'Para terminar antes de empezar más cosas', 'Para evitar las dailies', 'Para eliminar el Product Owner'] },
+      ],
+    },
+  ],
+  final: [
+    { q: 'Scrum se basa en el empirismo, que significa…', options: ['Decidir según lo observado y la experiencia', 'Seguir el plan inicial sin cambios', 'Que el jefe decide todo', 'Documentar cada detalle antes de empezar'] },
+    { q: '¿Cuántos Product Owners tiene un Scrum Team?', options: ['Uno', 'Dos', 'Uno por cada Developer', 'Ninguno'] },
+    { q: '¿Qué rol se enfoca en eliminar impedimentos y facilitar?', options: ['Product Owner', 'Scrum Master', 'Sponsor', 'Cliente'] },
+    { q: '¿Cuánto dura la Daily Scrum?', options: ['15 minutos', '1 hora', 'Medio día', 'No tiene límite'] },
+    { q: '¿En qué evento el equipo mejora su forma de trabajar?', options: ['Sprint Review', 'Sprint Planning', 'Sprint Retrospective', 'Daily Scrum'] },
+    { q: 'El compromiso del Sprint Backlog es…', options: ['El Product Goal', 'El Sprint Goal', 'La Definition of Done', 'El presupuesto'] },
+    { q: 'Una buena historia de usuario debe ser…', options: ['Muy grande y detallada', 'INVEST: independiente, negociable, valiosa, estimable, pequeña y testeable', 'Escrita solo por el Scrum Master', 'Medida siempre en horas'] },
+    { q: '¿Qué muestra un burndown chart?', options: ['El trabajo que queda en el Sprint', 'Los gastos del proyecto', 'La lista de interesados', 'Las vacaciones del equipo'] },
+  ],
+};
