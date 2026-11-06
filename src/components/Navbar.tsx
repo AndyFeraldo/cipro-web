@@ -11,6 +11,7 @@ const links = [
   { to: '/integrantes', label: 'Integrantes' },
   { to: '/#proyectos', label: 'Proyectos' },
   { to: '/#alianzas', label: 'Alianzas' },
+  { to: '/galeria', label: 'Galería' },
   { to: '/noticias', label: 'Noticias' },
 ];
 
@@ -22,10 +23,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-ink/5 bg-white/80 backdrop-blur-lg">
       <nav className="container-x flex h-16 items-center justify-between">
-        <Link to="/" aria-label="Inicio"><Logo /></Link>
+        <Link to="/" aria-label="Inicio"><Logo className="h-7 sm:h-8" /></Link>
         <div className="hidden items-center gap-1 md:flex">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} className="rounded-full px-3 py-2 text-sm font-medium text-ink/70 hover:bg-brand-50 hover:text-brand-700">{l.label}</NavLink>
+            <NavLink key={l.to} to={l.to} className="rounded-full px-3 py-2 text-sm font-medium text-ink/70 hover:bg-brand-50 hover:text-brand-600">{l.label}</NavLink>
           ))}
           <Link to={cta.to} className="btn-primary ml-2">{cta.label}</Link>
           <Link to="/admin" title="Panel de administración" aria-label="Panel de administración" className="ml-1 grid h-10 w-10 place-items-center rounded-full bg-ink text-white transition hover:bg-brand"><Lock /></Link>

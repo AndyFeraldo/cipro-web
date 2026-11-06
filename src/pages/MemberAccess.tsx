@@ -21,7 +21,7 @@ export default function MemberAccess() {
           <span className="eyebrow">Comunidad cipriana</span>
           <h1 className="section-title">Tu perfil cipriano, en un solo lugar</h1>
           <p className="mt-3 text-ink/65">Crea tu perfil con tu foto, tu historia en CIPRO, tu experiencia y tu LinkedIn. Así la comunidad (¡y los reclutadores!) conocen lo que haces.</p>
-          <Scrummy className="mt-8 h-72 w-72 animate-float" wave />
+          <Scrummy pose="chica-saludando" className="mt-8 h-80 animate-float" />
         </div>
         <div className="w-full">
           <div className="mx-auto mb-5 flex w-full max-w-xl rounded-full bg-white p-1 shadow-sm ring-1 ring-ink/5">

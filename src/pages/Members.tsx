@@ -34,6 +34,8 @@ export default function Members() {
         people: list.filter((m) => m.area_id === a.id).sort((x, y) => ROLE_ORDER.indexOf(x.role) - ROLE_ORDER.indexOf(y.role) || x.sort_order - y.sort_order),
       }))
       .filter((g) => g.people.length);
+    const noArea = list.filter((m) => !m.area_id);
+    if (!areaSlug && noArea.length) byArea.push({ area: { id: 'none', slug: 'otros', name: 'Más integrantes', short_name: null, description: null, icon: null, sort_order: 99, is_active: true }, people: noArea.sort((x, y) => ROLE_ORDER.indexOf(x.role) - ROLE_ORDER.indexOf(y.role) || x.sort_order - y.sort_order) });
     return byArea;
   }, [ms.data, areas.data, areaSlug]);
 
@@ -41,14 +43,14 @@ export default function Members() {
 
   return (
     <div className="pb-20">
-      <section className="bg-gradient-to-b from-brand-50 to-white py-14">
+      <section className="relative overflow-hidden bg-cream-gradient py-14">
         <div className="container-x flex flex-wrap items-center justify-between gap-6">
           <div>
             <span className="eyebrow">Equipo</span>
             <h1 className="section-title">Integrantes {current?.code}</h1>
             <p className="mt-2 text-ink/60">Conoce a los ciprianos de cada ciclo, organizados por área.</p>
           </div>
-          <Scrummy className="h-28 w-28" wave />
+          <Scrummy pose="frente" className="h-40" />
         </div>
         <div className="container-x mt-8 flex flex-wrap gap-3">
           <select className="input w-auto" value={periodId} onChange={(e) => { setPeriodId(e.target.value); const p = periods.data?.find((x) => x.id === e.target.value); if (p) { params.set('ciclo', p.code); setParams(params); } }}>
@@ -69,7 +71,7 @@ export default function Members() {
         {grouped.map(({ area, people }) => (
           <section key={area.id}>
             <div className="mb-5 flex items-baseline gap-3 border-b border-ink/10 pb-3">
-              <h2 className="text-2xl font-extrabold">{area.name}</h2>
+              <h2 className="flex items-center gap-2 text-2xl font-extrabold"><span className="h-3 w-3 rounded-full bg-brand" />{area.name}</h2>
               <span className="text-sm text-ink/50">{people.length} {people.length === 1 ? 'integrante' : 'integrantes'}</span>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">

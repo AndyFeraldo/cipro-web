@@ -13,10 +13,14 @@
   .btn-primary { @apply btn bg-brand text-white hover:bg-brand-600 shadow-lg shadow-brand/30; }
   .btn-dark { @apply btn bg-ink text-white hover:bg-black; }
   .btn-ghost { @apply btn border border-ink/15 hover:border-brand hover:text-brand; }
-  .eyebrow { @apply inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700; }
-  .section-title { @apply mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl; }
+  .eyebrow { @apply inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold uppercase tracking-[.18em] text-brand-600; }
+  .section-title { @apply mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl; }
   .card { @apply rounded-3xl border border-ink/5 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/10; }
   .input { @apply w-full rounded-xl border border-ink/15 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20; }
   .label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-ink/60; }
 }
-.dot-grid { background-image: radial-gradient(rgba(242,107,29,.25) 1px, transparent 1px); background-size: 18px 18px; }
+.dot-grid { background-image: radial-gradient(rgba(255,81,23,.22) 1.2px, transparent 1.2px); background-size: 22px 22px; }
+.dot-grid-light { background-image: radial-gradient(rgba(255,255,255,.18) 1.2px, transparent 1.2px); background-size: 22px 22px; }
+.bg-cream-gradient { background: radial-gradient(120% 90% at 85% 0%, #FECAA3 0%, #FFE6DA 30%, #FFF8F4 60%, #fff 100%); }
+.bg-space { background: radial-gradient(90% 70% at 85% 110%, rgba(255,81,23,.55) 0%, rgba(255,81,23,.08) 45%, transparent 70%), #070707; }
+.text-outline { -webkit-text-stroke: 2px #FF5117; color: transparent; }

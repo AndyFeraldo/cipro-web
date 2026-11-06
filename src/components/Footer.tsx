@@ -2,16 +2,17 @@ import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import Icon from './Icon';
 import { useSettings } from '../lib/settings';
+import { Constellation } from './Brand';
 
 export default function Footer() {
   const { settings } = useSettings();
   return (
-    <footer className="bg-ink text-white">
-      <div className="container-x grid gap-10 py-14 md:grid-cols-3">
+    <footer className="relative overflow-hidden bg-ink text-white">
+      <Constellation className="pointer-events-none absolute -right-10 top-0 w-96 opacity-40" />
+      <div className="container-x relative grid gap-10 py-14 md:grid-cols-3">
         <div>
-          <Logo dark />
+          <Logo dark tagline className="h-16" />
           <p className="mt-4 max-w-xs text-sm text-white/60">Círculo de Gestión de Proyectos · {settings.faculty || 'Facultad de Ingeniería de Sistemas'}.</p>
-          <p className="mt-2 font-display text-lg font-bold text-brand-400">“{settings.motto || 'Imagina y hazlo realidad.'}”</p>
         </div>
         <div className="text-sm">
           <h4 className="mb-3 font-bold">Explora</h4>
@@ -19,6 +20,8 @@ export default function Footer() {
             <li><Link to="/#nosotros" className="hover:text-brand-400">Quiénes somos</Link></li>
             <li><Link to="/integrantes" className="hover:text-brand-400">Integrantes por ciclo</Link></li>
             <li><Link to="/noticias" className="hover:text-brand-400">Noticias</Link></li>
+            <li><Link to="/galeria" className="hover:text-brand-400">Galería</Link></li>
+            <li><Link to="/#scrummy" className="hover:text-brand-400">Conoce a Scrummy</Link></li>
             <li><Link to="/acceso" className="hover:text-brand-400">Soy cipriano · Ingresar</Link></li>
             <li><Link to="/acceso#registro" className="hover:text-brand-400">Registrarme como cipriano</Link></li>
             <li><Link to="/admin" className="hover:text-brand-400">🔒 Panel admin</Link></li>
