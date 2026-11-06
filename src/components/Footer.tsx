@@ -19,7 +19,9 @@ export default function Footer() {
             <li><Link to="/#nosotros" className="hover:text-brand-400">Quiénes somos</Link></li>
             <li><Link to="/integrantes" className="hover:text-brand-400">Integrantes por ciclo</Link></li>
             <li><Link to="/noticias" className="hover:text-brand-400">Noticias</Link></li>
-            <li><Link to="/acceso" className="hover:text-brand-400">Acceso ciprianos</Link></li>
+            <li><Link to="/acceso" className="hover:text-brand-400">Soy cipriano · Ingresar</Link></li>
+            <li><Link to="/acceso#registro" className="hover:text-brand-400">Registrarme como cipriano</Link></li>
+            <li><Link to="/admin" className="hover:text-brand-400">🔒 Panel admin</Link></li>
           </ul>
         </div>
         <div className="text-sm">

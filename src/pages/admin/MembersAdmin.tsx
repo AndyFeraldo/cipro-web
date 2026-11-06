@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ROLE_LABEL, ROLE_ORDER, type Area, type Member, type Membership, type Period, type Role } from '../../lib/types';
 import ImageInput from './ImageInput';
+import { callMemberAccount } from '../../lib/session';
 
-type Edit = Partial<Member> & { dni?: string; email?: string; code?: string; hasCode?: boolean };
+type Edit = Partial<Member> & { dni?: string; origDni?: string; email?: string; phone?: string; code?: string };
 type MRow = Membership & { members: Member };
 
-function genCode() { return Math.random().toString(36).slice(2, 8).toUpperCase(); }
+function genCode() { return Math.random().toString(36).slice(2, 6).toUpperCase() + Math.floor(1000 + Math.random() * 9000); }
 
 export default function MembersAdmin() {
   const [periods, setPeriods] = useState<Period[]>([]);
@@ -16,6 +17,7 @@ export default function MembersAdmin() {
   const [periodId, setPeriodId] = useState('');
   const [areaId, setAreaId] = useState('');
   const [q, setQ] = useState('');
+  const [onlyPending, setOnlyPending] = useState(false);
   const [edit, setEdit] = useState<Edit | null>(null);
   const [msg, setMsg] = useState('');
   const [newMs, setNewMs] = useState<{ period_id: string; area_id: string; role: Role; position_title: string }>({ period_id: '', area_id: '', role: 'miembro', position_title: '' });
@@ -35,21 +37,30 @@ export default function MembersAdmin() {
   const list = useMemo(() => {
     let ids: Set<string> | null = null;
     if (periodId || areaId) ids = new Set(ms.filter((r) => (!periodId || r.period_id === periodId) && (!areaId || r.area_id === areaId)).map((r) => r.member_id));
+    if (onlyPending) return members.filter((m) => m.status === 'pendiente');
     return members.filter((m) => (!ids || ids.has(m.id)) && m.full_name.toLowerCase().includes(q.toLowerCase()));
-  }, [members, ms, periodId, areaId, q]);
+  }, [members, ms, periodId, areaId, q, onlyPending]);
+  const pending = members.filter((m) => m.status === 'pendiente').length;
 
   async function open(m?: Member) {
     setMsg('');
-    if (!m) { setEdit({ full_name: '', is_active: true, code: genCode() }); setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' }); return; }
-    const { data } = await supabase.from('member_private').select('dni,email,access_code_hash').eq('member_id', m.id).maybeSingle();
-    setEdit({ ...m, dni: data?.dni ?? '', email: data?.email ?? '', hasCode: !!data?.access_code_hash, code: '' });
+    if (!m) { setEdit({ full_name: '', is_active: true, status: 'aprobado', code: genCode() }); setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' }); return; }
+    const { data } = await supabase.from('member_private').select('dni,email,phone').eq('member_id', m.id).maybeSingle();
+    setEdit({ ...m, dni: data?.dni ?? '', origDni: data?.dni ?? '', email: data?.email ?? '', phone: data?.phone ?? '', code: '' });
     setNewMs({ period_id: periodId, area_id: areaId, role: 'miembro', position_title: '' });
   }
 
   async function save() {
     if (!edit?.full_name) { setMsg('El nombre es obligatorio.'); return; }
     if (edit.dni && !/^\d{8}$/.test(edit.dni)) { setMsg('El DNI debe tener 8 dígitos.'); return; }
-    const payload = { full_name: edit.full_name, career: edit.career || null, photo_url: edit.photo_url || null, linkedin_url: edit.linkedin_url || null, bio: edit.bio || null, is_active: edit.is_active ?? true, updated_at: new Date().toISOString() };
+    if (edit.code && edit.code.length < 6) { setMsg('La contraseña de acceso debe tener al menos 6 caracteres.'); return; }
+    if (edit.user_id && edit.dni !== edit.origDni && !edit.code) { setMsg('Para cambiar el DNI de alguien que ya tiene cuenta, asígnale también una nueva contraseña.'); return; }
+    const payload = {
+      full_name: edit.full_name, career: edit.career || null, photo_url: edit.photo_url || null, linkedin_url: edit.linkedin_url || null, bio: edit.bio || null,
+      is_active: edit.is_active ?? true, status: edit.status ?? 'aprobado', university_code: edit.university_code || null,
+      is_working: !!edit.is_working, company: edit.is_working ? edit.company || null : null, job_title: edit.is_working ? edit.job_title || null : null,
+      joined_on: edit.joined_on ? `${edit.joined_on.slice(0, 7)}-01` : null,
+    };
     let id = edit.id;
     if (id) { const { error } = await supabase.from('members').update(payload).eq('id', id); if (error) return setMsg(error.message); }
     else {
@@ -58,14 +69,18 @@ export default function MembersAdmin() {
       id = data.id;
       if (newMs.period_id) await supabase.from('memberships').insert({ member_id: id, period_id: newMs.period_id, area_id: newMs.area_id || null, role: newMs.role, position_title: newMs.position_title || null });
     }
-    if (edit.dni) {
-      const { error } = await supabase.rpc('admin_set_member_access', { p_member_id: id, p_dni: edit.dni, p_code: edit.code || '', p_email: edit.email || null });
+    if (edit.dni && edit.code) {
+      const r = await callMemberAccount({ action: 'admin_set_access', member_id: id, dni: edit.dni, password: edit.code, email: edit.email || null, phone: edit.phone || null });
+      if (!r.ok) return setMsg(r.error || 'No se pudo crear el acceso.');
+    } else if (edit.dni || edit.email || edit.phone) {
+      if (edit.dni && !/^\d{8}$/.test(edit.dni)) return setMsg('El DNI debe tener 8 dígitos.');
+      const { error } = await supabase.from('member_private').upsert({ member_id: id, dni: edit.dni, email: edit.email || null, phone: edit.phone || null }, { onConflict: 'member_id' });
       if (error) return setMsg(error.message.includes('duplicate') ? 'Ese DNI ya está registrado.' : error.message);
     }
-    setMsg(edit.code && edit.dni ? `Guardado ✔ — Código de acceso para ${edit.full_name}: ${edit.code} (anótalo, no se volverá a mostrar)` : 'Guardado ✔');
+    setMsg(edit.code && edit.dni ? `Guardado ✔ — ${edit.full_name} ya puede entrar en “Soy cipriano” con DNI ${edit.dni} y contraseña ${edit.code} (anótala, no se volverá a mostrar)` : 'Guardado ✔');
     await load();
     const fresh = (await supabase.from('members').select('*').eq('id', id!).single()).data;
-    if (fresh) setEdit((e) => ({ ...e!, ...fresh, id: fresh.id, code: '', hasCode: e?.hasCode || !!e?.code }));
+    if (fresh) setEdit((e) => ({ ...e!, ...fresh, id: fresh.id, code: '', origDni: e?.dni }));
   }
 
   async function addMs() {
@@ -95,8 +110,12 @@ export default function MembersAdmin() {
       <div className="rounded-3xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-extrabold">Integrantes <span className="text-sm font-normal text-ink/50">({list.length})</span></h2>
-          <button className="btn-primary py-1.5" onClick={() => open()}>+ Nuevo integrante</button>
+          <div className="flex gap-2">
+            <button onClick={() => setOnlyPending(!onlyPending)} className={`btn py-1.5 ${onlyPending ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-800 ring-1 ring-amber-200'}`}>⏳ Solicitudes {pending > 0 && <span className="rounded-full bg-amber-600 px-1.5 text-xs text-white">{pending}</span>}</button>
+            <button className="btn-primary py-1.5" onClick={() => open()}>+ Nuevo integrante</button>
+          </div>
         </div>
+        {onlyPending && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">Ciprianos que se registraron solos. Ábrelos, revisa sus datos y presiona <b>Aprobar</b> para que aparezcan en la web.</p>}
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <select className="input" value={periodId} onChange={(e) => setPeriodId(e.target.value)}><option value="">Todos los ciclos</option>{periods.map((p) => <option key={p.id} value={p.id}>{p.code}</option>)}</select>
           <select className="input" value={areaId} onChange={(e) => setAreaId(e.target.value)}><option value="">Todas las áreas</option>{areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select>
@@ -109,7 +128,7 @@ export default function MembersAdmin() {
               <li key={m.id} className="flex cursor-pointer items-center gap-3 py-2.5 hover:bg-brand-50/50" onClick={() => open(m)}>
                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-brand-100">{m.photo_url && <img src={m.photo_url} alt="" className="h-full w-full object-cover" />}</div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{m.full_name}{!m.is_active && <span className="ml-2 text-xs text-ink/40">(inactivo)</span>}</p>
+                  <p className="truncate text-sm font-semibold">{m.full_name}{!m.is_active && <span className="ml-2 text-xs text-ink/40">(oculto)</span>}{m.status === 'pendiente' && <span className="ml-2 rounded-full bg-amber-100 px-2 text-xs text-amber-800">pendiente</span>}{m.status === 'rechazado' && <span className="ml-2 rounded-full bg-red-100 px-2 text-xs text-red-700">rechazado</span>}</p>
                   <p className="truncate text-xs text-ink/50">{mine.map((r) => `${pCode(r.period_id)} · ${aName(r.area_id)} · ${r.position_title || ROLE_LABEL[r.role]}`).join('  |  ') || 'Sin ciclo asignado'}</p>
                 </div>
                 {m.linkedin_url && <span className="text-xs font-bold text-[#0A66C2]">in</span>}
@@ -124,10 +143,25 @@ export default function MembersAdmin() {
         {edit && (
           <div className="space-y-4 rounded-3xl bg-white p-5 shadow-sm">
             <h3 className="font-bold">{edit.id ? 'Editar integrante' : 'Nuevo integrante'}</h3>
+            {edit.id && edit.status !== 'aprobado' && (
+              <div className="rounded-2xl bg-amber-50 p-3 ring-1 ring-amber-200">
+                <p className="text-sm text-amber-900">{edit.status === 'pendiente' ? '⏳ Se registró por su cuenta y espera aprobación.' : 'Perfil rechazado.'}</p>
+                <div className="mt-2 flex gap-2">
+                  <button className="btn bg-green-600 py-1.5 text-white" onClick={async () => { await supabase.from('members').update({ status: 'aprobado' }).eq('id', edit.id!); setEdit({ ...edit, status: 'aprobado' }); setMsg('Aprobado ✔ — ya aparece en la web'); load(); }}>✓ Aprobar</button>
+                  {edit.status === 'pendiente' && <button className="btn bg-white py-1.5 text-red-700 ring-1 ring-red-200" onClick={async () => { await supabase.from('members').update({ status: 'rechazado' }).eq('id', edit.id!); setEdit({ ...edit, status: 'rechazado' }); setMsg('Rechazado'); load(); }}>Rechazar</button>}
+                </div>
+              </div>
+            )}
             <div><label className="label">Foto</label><ImageInput value={edit.photo_url ?? ''} folder="members" onChange={(v) => setEdit({ ...edit, photo_url: v })} /></div>
             <div><label className="label">Nombre completo *</label><input className="input" value={edit.full_name ?? ''} onChange={(e) => setEdit({ ...edit, full_name: e.target.value })} /></div>
             <div><label className="label">Carrera</label><input className="input" value={edit.career ?? ''} onChange={(e) => setEdit({ ...edit, career: e.target.value })} placeholder="Ingeniería de Sistemas" /></div>
             <div><label className="label">LinkedIn (URL)</label><input className="input" value={edit.linkedin_url ?? ''} onChange={(e) => setEdit({ ...edit, linkedin_url: e.target.value })} placeholder="https://www.linkedin.com/in/…" /></div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div><label className="label">Código universitario</label><input className="input" value={edit.university_code ?? ''} onChange={(e) => setEdit({ ...edit, university_code: e.target.value.replace(/\D/g, '') })} /></div>
+              <div><label className="label">Ingresó a CIPRO (mes)</label><input className="input" type="month" value={(edit.joined_on ?? '').slice(0, 7)} onChange={(e) => setEdit({ ...edit, joined_on: e.target.value })} /></div>
+            </div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-brand" checked={!!edit.is_working} onChange={(e) => setEdit({ ...edit, is_working: e.target.checked })} /> Trabajando actualmente</label>
+            {edit.is_working && <div className="grid gap-3 sm:grid-cols-2"><input className="input" placeholder="Empresa" value={edit.company ?? ''} onChange={(e) => setEdit({ ...edit, company: e.target.value })} /><input className="input" placeholder="Cargo" value={edit.job_title ?? ''} onChange={(e) => setEdit({ ...edit, job_title: e.target.value })} /></div>}
             <div><label className="label">Bio corta</label><textarea className="input" value={edit.bio ?? ''} onChange={(e) => setEdit({ ...edit, bio: e.target.value })} /></div>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-brand" checked={edit.is_active ?? true} onChange={(e) => setEdit({ ...edit, is_active: e.target.checked })} /> Visible en la web</label>
 
@@ -135,9 +169,10 @@ export default function MembersAdmin() {
               <p className="text-xs font-bold uppercase tracking-wide text-ink/60">🔒 Datos privados (no se muestran en la web)</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div><label className="label">DNI</label><input className="input" inputMode="numeric" maxLength={8} value={edit.dni ?? ''} onChange={(e) => setEdit({ ...edit, dni: e.target.value.replace(/\D/g, '') })} /></div>
-                <div><label className="label">Correo</label><input className="input" type="email" value={edit.email ?? ''} onChange={(e) => setEdit({ ...edit, email: e.target.value })} /></div>
+                <div><label className="label">Celular</label><input className="input" value={edit.phone ?? ''} onChange={(e) => setEdit({ ...edit, phone: e.target.value })} /></div>
+                <div className="sm:col-span-2"><label className="label">Correo</label><input className="input" type="email" value={edit.email ?? ''} onChange={(e) => setEdit({ ...edit, email: e.target.value })} /></div>
               </div>
-              <label className="label mt-3">Código de acceso {edit.hasCode && <span className="normal-case text-green-700">(ya tiene uno; escribe otro solo para cambiarlo)</span>}</label>
+              <label className="label mt-3">Contraseña de acceso {edit.user_id ? <span className="normal-case text-green-700">(ya tiene cuenta; escribe una solo si quieres cambiársela)</span> : <span className="normal-case">(para que entre en “Soy cipriano”)</span>}</label>
               <div className="flex gap-2"><input className="input font-mono" value={edit.code ?? ''} onChange={(e) => setEdit({ ...edit, code: e.target.value })} /><button type="button" className="btn-ghost py-1.5" onClick={() => setEdit({ ...edit, code: genCode() })}>Generar</button></div>
             </div>
 

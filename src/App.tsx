@@ -8,6 +8,9 @@ import Members from './pages/Members';
 import { NewsDetail, NewsList } from './pages/NewsPages';
 import MemberAccess from './pages/MemberAccess';
 import AdminLayout from './pages/admin/AdminLayout';
+import MyProfile from './pages/MyProfile';
+import PublicProfile from './pages/PublicProfile';
+import { SessionProvider } from './lib/session';
 
 function ScrollHandler() {
   const { pathname, hash } = useLocation();
@@ -23,6 +26,7 @@ function PublicLayout() {
 
 export default function App() {
   return (
+    <SessionProvider>
     <SettingsProvider>
       <BrowserRouter>
         <ScrollHandler />
@@ -33,10 +37,13 @@ export default function App() {
             <Route path="/noticias" element={<NewsList />} />
             <Route path="/noticias/:slug" element={<NewsDetail />} />
             <Route path="/acceso" element={<MemberAccess />} />
+            <Route path="/mi-perfil" element={<MyProfile />} />
+            <Route path="/cipriano/:id" element={<PublicProfile />} />
           </Route>
           <Route path="/admin" element={<AdminLayout />} />
         </Routes>
       </BrowserRouter>
     </SettingsProvider>
+    </SessionProvider>
   );
 }

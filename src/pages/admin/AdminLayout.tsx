@@ -89,12 +89,12 @@ export default function AdminLayout() {
   );
 }
 
-/** "2020-4390" o "20204390" -> correo institucional de la cuenta admin */
+/** Código universitario (ej. 20204390) -> correo institucional de la cuenta admin */
 export function codeToEmail(input: string) {
   const v = input.trim().toLowerCase();
   return v.includes('@') ? v : `${v.replace(/\D/g, '')}@aloe.ulima.edu.pe`;
 }
-const userCode = (email?: string) => (email || '').split('@')[0].replace(/^(\d{4})(\d+)$/, '$1-$2');
+const userCode = (email?: string) => (email || '').split('@')[0];
 
 function ChangePassword({ email, onClose }: { email: string; onClose: () => void }) {
   const [cur, setCur] = useState('');
@@ -150,7 +150,7 @@ function AdminLogin() {
         <Logo />
         <h1 className="mt-6 text-xl font-extrabold">Panel de administración</h1>
         <label className="label mt-6">Código universitario</label>
-        <input className="input" required autoComplete="username" placeholder="2020-4390" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
+        <input className="input" required autoComplete="username" placeholder="20204390" value={codigo} onChange={(e) => setCodigo(e.target.value)} />
         <label className="label mt-4">Contraseña</label>
         <input className="input" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {err && <p className="mt-3 text-sm text-red-600">{err}</p>}

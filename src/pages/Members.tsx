@@ -26,7 +26,7 @@ export default function Members() {
   );
 
   const grouped = useMemo(() => {
-    const list = (ms.data || []).filter((m) => m.members?.is_active !== false);
+    const list = (ms.data || []).filter((m) => m.members && m.members.is_active !== false);
     const byArea = (areas.data || [])
       .filter((a) => !areaSlug || a.slug === areaSlug)
       .map((a) => ({
